@@ -1,0 +1,32 @@
+TOPIC
+    about_Ldbc
+
+SHORT DESCRIPTION
+    LiteDB Cmdlets for PowerShell
+
+LONG DESCRIPTION
+    The module provides the following commands:
+
+        New-LiteDatabase
+            Opens new or existing database and creates the database instance
+
+        Use-LiteDatabase
+            Opens the database, invokes the script, and closes the database
+
+        Use-LiteTransaction
+            Invokes the script operating on data with a transaction
+
+        Invoke-LiteCommand
+            Invokes the LiteDB SQL command and gets results
+
+        Get-LiteData
+            Gets data from the collection
+
+        Add-LiteData
+            Inserts data to the collection
+
+        Remove-LiteData
+            Removes data from the collection
+
+SEE ALSO
+    LiteDB https://www.litedb.org

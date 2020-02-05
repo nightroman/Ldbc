@@ -130,6 +130,16 @@ task Markdown {
 	)}
 }
 
+# Synopsis: Set $script:Version.
+task Version {
+	($script:Version = Get-Version)
+	# manifest version
+	$data = & ([scriptblock]::Create([IO.File]::ReadAllText("$ModuleRoot\$ModuleName.psd1")))
+	assert ($data.ModuleVersion -eq $script:Version)
+	# assembly version
+	assert ((Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.FileVersion -eq ([Version]"$script:Version.0"))
+}
+
 # Synopsis: Make the package in z\tools.
 task Package {equals $Configuration Release}, Build, Test, Markdown, {
 	remove z
@@ -144,7 +154,6 @@ task Package {equals $Configuration Release}, Build, Test, Markdown, {
 
 # Synopsis: Make and push the PSGallery package.
 task PushPSGallery Package, Version, {
-	equals $TargetFramework netstandard2.0
 	$NuGetApiKey = Read-Host NuGetApiKey
 	Publish-Module -Path z/tools/$ModuleName -NuGetApiKey $NuGetApiKey
 },

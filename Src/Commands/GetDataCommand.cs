@@ -12,7 +12,7 @@ namespace Ldbc.Commands
 	public sealed class GetDataCommand : Abstract
 	{
 		[Parameter(Position = 0, Mandatory = true)]
-		public string CollectionName { get; set; }
+		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1)]
 		public string Filter { get; set; }
@@ -20,25 +20,17 @@ namespace Ldbc.Commands
 		[Parameter(Position = 2)]
 		public object Parameters { get; set; }
 
-		[Parameter]
-		public ILiteDatabase Database { get; set; }
-
 		protected override void BeginProcessing()
 		{
-			if (Database == null)
-				Database = ResolveDatabase();
-
-			var collection = Database.GetCollection(CollectionName);
-
 			if (Filter == null)
 			{
-				foreach (var doc in collection.FindAll())
+				foreach (var doc in Collection.FindAll())
 					WriteObject(Actor.ToObject(doc));
 			}
 			else
 			{
 				var param = new InputParameters(Parameters);
-				foreach (var doc in collection.Find(param.Expression(Filter)))
+				foreach (var doc in Collection.Find(param.Expression(Filter)))
 					WriteObject(Actor.ToObject(doc));
 			}
 		}

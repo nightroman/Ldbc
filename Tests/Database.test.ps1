@@ -66,3 +66,21 @@ task UseStream {
 		equals $Database.UserVersion 26
 	}
 }
+
+task GetCollectionDoesNotCreate {
+	$database = New-LiteDatabase
+
+	$test = Get-LiteCollection test
+	$r = @($database.GetCollectionNames())
+	equals $r.Count 0
+
+	Get-LiteData $test
+	$r = @($database.GetCollectionNames())
+	equals $r.Count 0
+
+	Add-LiteData $test @{p1 = 1}
+	$r = @($database.GetCollectionNames())
+	equals $r.Count 1
+
+	$database.Dispose()
+}

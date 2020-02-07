@@ -12,30 +12,13 @@ namespace Ldbc.Commands
 	public sealed class AddDataCommand : Abstract
 	{
 		[Parameter(Position = 0, Mandatory = true)]
-		public string CollectionName { get; set; }
+		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1, ValueFromPipeline = true)]
 		public object InputObject { get; set; }
 
 		[Parameter]
-		public ILiteDatabase Database { get; set; }
-
-		[Parameter]
-		public BsonAutoId AutoId { get { return _AutoId; } set { _AutoId = value; } }
-		BsonAutoId _AutoId = BsonAutoId.ObjectId;
-
-		[Parameter]
 		public SwitchParameter Result { get; set; }
-
-		ILiteCollection<BsonDocument> _collection;
-
-		protected override void BeginProcessing()
-		{
-			if (Database == null)
-				Database = ResolveDatabase();
-
-			_collection = Database.GetCollection(CollectionName, _AutoId);
-		}
 
 		protected override void ProcessRecord()
 		{
@@ -49,7 +32,7 @@ namespace Ldbc.Commands
 			try
 			{
 				var document = Actor.ToBsonDocument(InputObject);
-				var id = _collection.Insert(document);
+				var id = Collection.Insert(document);
 				if (Result)
 					WriteObject(Actor.ToObject(id));
 			}

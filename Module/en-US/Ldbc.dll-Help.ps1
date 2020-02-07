@@ -7,11 +7,17 @@ Import-Module Ldbc
 Set-StrictMode -Version 2
 
 $CollectionNameParameter = @'
-Specifies the collection name (case insensitive).
+The collection name, case insensitive.
+'@
+
+$CollectionParameter = @'
+The collection instance.
+Use Get-LiteCollection in order to get it from a database.
 '@
 
 $DatabaseParameter = @'
-Specifies the database. If it is omitted then the variable $Database is expected.
+The database instance. If it is omitted then the variable $Database is expected.
+Use New-LiteDatabase or Use-LiteDatabase in order to get the database instance.
 '@
 
 $FilterParameter = @'
@@ -29,13 +35,11 @@ Specifies the expression named parameters (IDictionary) or indexed arguments (IL
 	description = @'
 The cmdlet inserts input documents to the collection.
 One document may be specified as the parameter.
-Many documents are provided via pipeline.
+Use the pipeline for several input documents.
 '@
 	parameters = @{
-		AutoId = 'Defines the automatic identifier data type.'
-		CollectionName = $CollectionNameParameter
-		Database = $DatabaseParameter
-		InputObject = 'Input document(s).'
+		Collection = $CollectionParameter
+		InputObject = 'The input document.'
 		Result = 'Tells to output document _id values.'
 	}
 	inputs = @(
@@ -52,16 +56,44 @@ Many documents are provided via pipeline.
 	)
 	examples = @(
 		@{
-			#title = ''
-			#introduction = ''
 			code = {
+				Use-LiteDatabase :memory: {
+					# get the collection, add some hashtable
+					# (use [ordered] to keep the key order)
+					$log = Get-LiteCollection log
+					Add-LiteData $log ([ordered]@{
+						Message = 'Doing X...'
+						Type = 'Info'
+						Time = Get-Date
+					})
+
+					# get data
+					Get-LiteData $log
+				}
 			}
-			remarks = ''
+			test = { . $args[0] }
+		}
+		@{
+			code = {
+				Use-LiteDatabase :memory: {
+					# get processes as PSCustomObject with some properties
+					$data = Get-Process | Select-Object @{n='_id'; e={$_.Id}}, ProcessName, WorkingSet64
+
+					# get the collection and add data
+					$test = Get-LiteCollection test
+					$data | Add-LiteData $test
+
+					# get data
+					Get-LiteData $test
+				}
+			}
 			test = { . $args[0] }
 		}
 	)
 	links = @(
-		@{ text = ''; URI = '' }
+		@{ text = 'New-LiteDatabase' }
+		@{ text = 'Use-LiteDatabase' }
+		@{ text = 'Get-LiteCollection' }
 	)
 }
 
@@ -73,8 +105,7 @@ Many documents are provided via pipeline.
 The cmdlets gets all or specified by the filter documents from the collection.
 '@
 	parameters = @{
-		CollectionName = $CollectionNameParameter
-		Database = $DatabaseParameter
+		Collection = $CollectionParameter
 		Filter = $FilterParameter
 		Parameters = $ParametersParameter
 	}
@@ -107,8 +138,7 @@ The cmdlets gets all or specified by the filter documents from the collection.
 The cmdlet removes documents specified by the filter from the collection.
 '@
 	parameters = @{
-		CollectionName = $CollectionNameParameter
-		Database = $DatabaseParameter
+		Collection = $CollectionParameter
 		Filter = $FilterParameter
 		Parameters = $ParametersParameter
 		Result = 'Tells to output the number of removed documents.'
@@ -193,7 +223,7 @@ Consider using Use-LiteDatabase instead for more automatic disposal.
 	examples = @(
 		@{
 			code = {
-				$Database = New-LiteDatabase "MyDB.LiteDB"
+				$Database = New-LiteDatabase :memory:
 				try {
 					# working with $Database...
 				}
@@ -230,11 +260,10 @@ database is automatically disposed.
 	examples = @(
 		@{
 			code = {
-				Use-LiteDatabase "MyDB.LiteDB" {
+				Use-LiteDatabase :memory: {
 					# working with $Database...
 				}
 			}
-			test = { . $args[0] }
 		}
 	)
 	links = @(
@@ -264,7 +293,7 @@ failure.
 	examples = @(
 		@{
 			code = {
-				Use-LiteDatabase "MyDB.LiteDB" {
+				Use-LiteDatabase :memory: {
 					Use-LiteTransaction {
 						# working with $Database...
 					}
@@ -275,5 +304,41 @@ failure.
 	)
 	links = @(
 		@{ text = ''; URI = '' }
+	)
+}
+
+### Get-LiteCollection
+@{
+	command = 'Get-LiteCollection'
+	synopsis = 'Gets the collection instance.'
+	description = @'
+The cmdlet gets the collection instance by its name from the specified or
+default database.
+'@
+	parameters = @{
+		CollectionName = $CollectionNameParameter
+		AutoId = 'The automatic identifier data type.'
+		Database = $DatabaseParameter
+	}
+	outputs = @(
+		@{
+			type = 'LiteDB.ILiteCollection[LiteDB.BsonDocument]'
+			description = 'The collection instance.'
+		}
+	)
+	examples = @(
+		@{
+			code = {
+				Use-LiteDatabase :memory: {
+					$collection = Get-LiteCollection MyCollection
+					Get-LiteData $collection
+				}
+			}
+			test = { . $args[0] }
+		}
+	)
+	links = @(
+		@{ text = 'New-LiteDatabase' }
+		@{ text = 'Use-LiteDatabase' }
 	)
 }

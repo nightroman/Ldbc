@@ -35,29 +35,30 @@ Get-Command -Module Ldbc
 help Use-LiteDatabase -Full
 ```
 
-Take a look at tests in the repository for the examples of available features.
-
 **Step 4:** Try add, get, remove operations with a memory database
 
 (a) using `Add-LiteData`, `Get-LiteData`, `Remove-LiteData`:
 
 ```powershell
 Use-LiteDatabase :memory: {
+    # get the collection, specify auto id
+    $test = Get-LiteCollection Test Int32
+
     # add two documents
     $data = @{Name = 'John'}, @{Name = 'Mary'}
-    $data | Add-LiteData Test -AutoId Int32
+    $data | Add-LiteData $test
 
     # find using the filter with parameters
     # ~> {"_id":1,"Name":"John"}
-    $r = Get-LiteData Test '$.Name = @param1' @{param1 = 'John'}
+    $r = Get-LiteData $test '$.Name = @param1' @{param1 = 'John'}
     "$r"
 
     # remove one document
-    Remove-LiteData Test '$._id = 1'
+    Remove-LiteData $test '$._id = 1'
 
     # get all remaining documents
     # ~> {"_id":2,"Name":"Mary"}
-    $r = Get-LiteData Test
+    $r = Get-LiteData $test
     "$r"
 }
 ```
@@ -83,6 +84,14 @@ Use-LiteDatabase :memory: {
     "$r"
 }
 ```
+
+**Next steps**
+
+Read cmdlets help with basic examples. Take a look at tests in the repository
+for more technical examples.
+
+Read LiteDB [DOCS](https://www.litedb.org/docs/). Some LiteDB API may and
+should be used directly. Ldbc is the helper, not replacement.
 
 ## Work in progress
 

@@ -107,6 +107,12 @@ task Help @{
 	}
 }
 
+# Synopsis: Test help script examples.
+task TestHelp {
+	. Helps.ps1
+	Test-Helps Module\en-US\$ModuleName.dll-Help.ps1
+}
+
 # Synopsis: Test in the current PowerShell.
 task Test {
 	$ErrorView = 'NormalView'
@@ -141,7 +147,7 @@ task Version {
 }
 
 # Synopsis: Make the package in z\tools.
-task Package {equals $Configuration Release}, Build, Test, Markdown, {
+task Package Build, TestHelp, Test, Test6, Markdown, {
 	remove z
 	$null = mkdir z\tools\$ModuleName
 

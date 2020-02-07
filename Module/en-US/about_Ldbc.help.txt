@@ -19,6 +19,9 @@ LONG DESCRIPTION
         Invoke-LiteCommand
             Invokes the LiteDB SQL command and gets results
 
+        Get-LiteCollection
+            Gets the collection instance
+
         Get-LiteData
             Gets data from the collection
 

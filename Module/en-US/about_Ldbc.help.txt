@@ -22,14 +22,12 @@ LONG DESCRIPTION
         Get-LiteCollection
             Gets the collection instance
 
-        Get-LiteData
-            Gets data from the collection
-
         Add-LiteData
-            Inserts data to the collection
-
+        Get-LiteData
+        Set-LiteData
         Remove-LiteData
-            Removes data from the collection
+        Update-LiteData
+            Operate on documents in the collection
 
 SEE ALSO
     LiteDB https://www.litedb.org

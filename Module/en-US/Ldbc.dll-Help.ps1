@@ -21,17 +21,71 @@ Use New-LiteDatabase or Use-LiteDatabase in order to get the database instance.
 '@
 
 $FilterParameter = @'
-Specifies the filter expression.
+Specifies the filter expression and optional parameters dictionary separated by a comma.
+
+The expression is either a string or existing Ldbc.Expression or LiteDB.BsonExpression.
 '@
 
 $ParametersParameter = @'
 Specifies the expression named parameters (IDictionary) or indexed arguments (IList or object).
 '@
 
+$DocumentInputs = @(
+	@{
+		type = 'PSCustomObject, IDictionary (Hashtable, Ldbc.Dictionary, LiteDB.BsonDocument, ...), ...'
+		description = 'Document-like objects.'
+	}
+)
+
+### Get-LiteData
+@{
+	command = 'Get-LiteData'
+	synopsis = 'Gets data from the collection.'
+	description = @'
+The cmdlets gets all or specified by the filter documents from the collection.
+'@
+	parameters = @{
+		Collection = $CollectionParameter
+		Filter = $FilterParameter
+	}
+	outputs = @(
+		@{
+			type = 'Ldbc.Dictionary'
+			description = 'PowerShell friendly wrapper of BsonDocument.'
+		}
+	)
+	examples = @(
+		@{
+			code = {
+				Use-LiteDatabase :memory: {
+					$test = Get-LiteCollection test
+
+					# add two documents
+					$data = @{_id = 1; Name = 'John'}, @{_id = 2; Name = 'Mary'}
+					$data | Add-LiteData $test
+
+					# query data using filter with parameters
+					Get-LiteData $test ('$.Name = @Name', @{Name = 'Mary'})
+				}
+			}
+			test = {
+				$r = . $args[0]
+				equals "$r" '{"_id":2,"Name":"Mary"}'
+			}
+		}
+	)
+	links = @(
+		@{ text = 'Add-LiteData' }
+		@{ text = 'Set-LiteData' }
+		@{ text = 'Remove-LiteData' }
+		@{ text = 'Update-LiteData' }
+	)
+}
+
 ### Add-LiteData
 @{
 	command = 'Add-LiteData'
-	synopsis = 'Inserts data to the collection.'
+	synopsis = 'Inserts input documents to the collection.'
 	description = @'
 The cmdlet inserts input documents to the collection.
 One document may be specified as the parameter.
@@ -42,12 +96,7 @@ Use the pipeline for several input documents.
 		InputObject = 'The input document.'
 		Result = 'Tells to output document _id values.'
 	}
-	inputs = @(
-		@{
-			type = 'IDictionary, Ldbc.Dictionary, LiteDB.BsonDocument, PSCustomObject, ...'
-			description = 'Document-like objects.'
-		}
-	)
+	inputs = $DocumentInputs
 	outputs = @(
 		@{
 			type = 'object'
@@ -91,42 +140,72 @@ Use the pipeline for several input documents.
 		}
 	)
 	links = @(
-		@{ text = 'New-LiteDatabase' }
-		@{ text = 'Use-LiteDatabase' }
-		@{ text = 'Get-LiteCollection' }
+		@{ text = 'Get-LiteData' }
+		@{ text = 'Set-LiteData' }
+		@{ text = 'Remove-LiteData' }
+		@{ text = 'Update-LiteData' }
 	)
 }
 
-### Get-LiteData
+### Set-LiteData
 @{
-	command = 'Get-LiteData'
-	synopsis = 'Gets data from the collection.'
+	command = 'Set-LiteData'
+	synopsis = 'Replaces old documents in the collection with new input documents.'
 	description = @'
-The cmdlets gets all or specified by the filter documents from the collection.
+The cmdlet replaces old documents in the collection with new input documents.
+One document may be specified as the parameter.
+Use the pipeline for several input documents.
+
+If the old document does not exist then the new is added if Add is set.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
-		Filter = $FilterParameter
-		Parameters = $ParametersParameter
+		InputObject = 'The input document.'
+		Add = @'
+Tells to add the new document if the old does not exist.'
+'@
+		Result = @'
+Tells to output
+the number of replaced documents (Add is not set) or
+the number of added documents (Add is set).
+'@
 	}
+	inputs = $DocumentInputs
 	outputs = @(
 		@{
-			type = 'Ldbc.Dictionary'
-			description = 'PowerShell friendly wrapper of BsonDocument.'
+			type = '[int]'
+			description = @'
+The number of replaced documents (Add is not set) or
+the number of added documents (Add is set).
+'@
 		}
 	)
 	examples = @(
 		@{
-			#title = ''
-			#introduction = ''
 			code = {
+				Use-LiteDatabase :memory: {
+					$test = Get-LiteCollection test
+
+					# 1 (added)
+					Set-LiteData $test @{_id = 1; name = 'John'} -Add -Result
+					Get-LiteData $test
+
+					# 1 (updated)
+					Set-LiteData $test @{_id = 1; name = 'Mary'} -Result
+					Get-LiteData $test
+				}
 			}
-			remarks = ''
-			test = { . $args[0] }
+			test = {
+				$r = . $args[0]
+				equals "$r" '1 {"_id":1,"name":"John"} 1 {"_id":1,"name":"Mary"}'
+			}
 		}
 	)
 	links = @(
-		@{ text = ''; URI = '' }
+		@{ text = 'Add-LiteData' }
+		@{ text = 'Get-LiteData' }
+		@{ text = 'Remove-LiteData' }
+		@{ text = 'Update-LiteData' }
 	)
 }
 
@@ -140,21 +219,85 @@ The cmdlet removes documents specified by the filter from the collection.
 	parameters = @{
 		Collection = $CollectionParameter
 		Filter = $FilterParameter
-		Parameters = $ParametersParameter
 		Result = 'Tells to output the number of removed documents.'
 	}
 	examples = @(
 		@{
-			#title = ''
-			#introduction = ''
 			code = {
+				Use-LiteDatabase :memory: {
+					$test = Get-LiteCollection test
+
+					# add two documents
+					$data = @{_id = 1; Name = 'John'}, @{_id = 2; Name = 'Mary'}
+					$data | Add-LiteData $test
+
+					# remove data using filter with parameters
+					Remove-LiteData $test ('$.Name = @Name', @{Name = 'Mary'})
+					Get-LiteData $test
+				}
 			}
-			remarks = ''
-			test = { . $args[0] }
+			test = {
+				$r = . $args[0]
+				equals "$r" '{"_id":1,"Name":"John"}'
+			}
 		}
 	)
 	links = @(
-		@{ text = ''; URI = '' }
+		@{ text = 'Add-LiteData' }
+		@{ text = 'Get-LiteData' }
+		@{ text = 'Set-LiteData' }
+		@{ text = 'Update-LiteData' }
+	)
+}
+
+### Update-LiteData
+@{
+	command = 'Update-LiteData'
+	synopsis = 'Updates documents in the collection.'
+	description = @'
+The cmdlet updates the documents specified by the filter expression using the
+update expression.
+'@
+	parameters = @{
+		Collection = $CollectionParameter
+		Filter = $FilterParameter
+		Update = 'Specifies the transformation expression.'
+		Result = 'Tells to output the number of updated documents.'
+	}
+	outputs = @(
+		@{
+			type = '[int]'
+			description = 'The number of updated documents.'
+		}
+	)
+	examples = @(
+		@{
+			code = {
+				Use-LiteDatabase :memory: {
+					$test = Get-LiteCollection test
+
+					# add data
+					Add-LiteData $test @{_id = 1; Name = 'John'}
+
+					# change Name using filter and update with parameters
+					$filter = '$.Name = @Name', @{Name = 'John'}
+					$update = '{Name : @Name}', @{Name = 'Mary'}
+					Update-LiteData $test $filter $update
+
+					Get-LiteData $test
+				}
+			}
+			test = {
+				$r = . $args[0]
+				equals "$r" '{"_id":1,"Name":"Mary"}'
+			}
+		}
+	)
+	links = @(
+		@{ text = 'Add-LiteData' }
+		@{ text = 'Get-LiteData' }
+		@{ text = 'Set-LiteData' }
+		@{ text = 'Remove-LiteData' }
 	)
 }
 
@@ -170,7 +313,7 @@ supports parameters).
 		Command = 'Specifies the LiteDB SQL command.'
 		Database = $DatabaseParameter
 		Parameters = $ParametersParameter
-		Quiet = 'Tells not to output results.'
+		Quiet = 'Tells to omit the command output.'
 	}
 	outputs = @(
 		@{
@@ -180,12 +323,7 @@ supports parameters).
 	)
 	examples = @(
 		@{
-			#title = ''
-			#introduction = ''
-			code = {
-			}
-			remarks = ''
-			test = { . $args[0] }
+			title = 'See README examples.'
 		}
 	)
 	links = @(
@@ -226,13 +364,17 @@ Consider using Use-LiteDatabase instead for more automatic disposal.
 				$Database = New-LiteDatabase :memory:
 				try {
 					# working with $Database...
+					$Database
 				}
 				finally {
 					$Database.Dispose()
 				}
 			}
 			remarks = 'Classic try/finally pattern for disposing objects.'
-			test = { . $args[0] }
+			test = {
+				$r = . $args[0]
+				assert ($r -is [LiteDB.LiteDatabase])
+			}
 		}
 	)
 	links = @(
@@ -262,7 +404,12 @@ database is automatically disposed.
 			code = {
 				Use-LiteDatabase :memory: {
 					# working with $Database...
+					$Database
 				}
+			}
+			test = {
+				$r = . $args[0]
+				assert ($r -is [LiteDB.LiteDatabase])
 			}
 		}
 	)
@@ -295,15 +442,20 @@ failure.
 			code = {
 				Use-LiteDatabase :memory: {
 					Use-LiteTransaction {
-						# working with $Database...
+						# working with $Database in transaction...
+						$Database
 					}
 				}
 			}
-			test = { . $args[0] }
+			test = {
+				$r = . $args[0]
+				assert ($r -is [LiteDB.LiteDatabase])
+			}
 		}
 	)
 	links = @(
-		@{ text = ''; URI = '' }
+		@{ text = 'New-LiteDatabase' }
+		@{ text = 'Use-LiteDatabase' }
 	)
 }
 
@@ -330,11 +482,17 @@ default database.
 		@{
 			code = {
 				Use-LiteDatabase :memory: {
-					$collection = Get-LiteCollection MyCollection
-					Get-LiteData $collection
+					# get the collection
+					$MyCollection = Get-LiteCollection MyCollection
+
+					# use it...
+					$MyCollection
 				}
 			}
-			test = { . $args[0] }
+			test = {
+				$r = . $args[0]
+				assert ($r -is [LiteDB.LiteCollection[LiteDB.BsonDocument]])
+			}
 		}
 	)
 	links = @(

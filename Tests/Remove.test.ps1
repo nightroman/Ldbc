@@ -9,18 +9,10 @@ task TODO_FilterWithParameters {
 		# add document
 		Add-LiteData $test @{_id = 1; p1 = 1}
 
-		# remove using filter with argument
-		$r = Remove-LiteData $test '$._id = @0' 1 -Result
+		# remove using filter with parameter
+		$r = Remove-LiteData $test '$._id = @id', @{id = 1} -Result
 		if (1 -eq $r) {
 			Write-Warning TODO_FilterWithParameters-1
-			return
-		}
-		equals $r 0 #! current wrong but known case
-
-		# remove using filter with parameter
-		$r = Remove-LiteData $test '$._id = @id' @{id = 1} -Result
-		if (1 -eq $r) {
-			Write-Warning TODO_FilterWithParameters-2
 			return
 		}
 		equals $r 0 #! current wrong but known case

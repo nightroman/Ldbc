@@ -1,5 +1,11 @@
 # Ldbc Release Notes
 
+## v0.2.0
+
+- New cmdlets `Set-LiteData`, `Update-LiteData`
+- New helper `Ldbc.Expression`, wrapper of `LiteDB.BsonExpression`
+- Cmdlet expression parameters are specified as `object[]`, see help
+
 ## v0.1.0
 
 - New cmdlet `Get-LiteCollection`

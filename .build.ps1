@@ -46,7 +46,7 @@ task Meta @MetaParam {
 
 	PrivateData = @{
 		PSData = @{
-			Tags = 'LiteDB', 'Database'
+			Tags = 'LiteDB', 'Database', 'NoSQL', 'BSON', 'JSON'
 			ProjectUri = '$Project'
 			LicenseUri = 'http://www.apache.org/licenses/LICENSE-2.0'
 			ReleaseNotes = '$Project/blob/master/Release-Notes.md'
@@ -74,8 +74,7 @@ using System.Runtime.InteropServices;
 # Synopsis: Build the project (and post-build Publish).
 task Build Meta, {
 	exec { dotnet build Src\$ModuleName.csproj -c $Configuration -f $TargetFramework }
-},
-Help
+}
 
 # Synopsis: Publish the module (post-build).
 task Publish {
@@ -107,8 +106,8 @@ task Help @{
 	}
 }
 
-# Synopsis: Test help script examples.
-task TestHelp {
+# Synopsis: Make an test help.
+task TestHelp Help, {
 	. Helps.ps1
 	Test-Helps Module\en-US\$ModuleName.dll-Help.ps1
 }

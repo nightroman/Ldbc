@@ -3,3 +3,4 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "rk", Scope = "namespaceanddescendants", Target = "Ldbc.Commands")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "rk", Scope = "namespaceanddescendants", Target = "Ldbc.Commands")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "rk", Scope = "namespaceanddescendants", Target = "Ldbc.Commands")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1044:Properties should not be write only", Justification = "rk", Scope = "namespaceanddescendants", Target = "Ldbc.Commands")]

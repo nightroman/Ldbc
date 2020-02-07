@@ -15,22 +15,19 @@ namespace Ldbc.Commands
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1)]
-		public string Filter { get; set; }
-
-		[Parameter(Position = 2)]
-		public object Parameters { get; set; }
+		public object[] Filter { set { _Filter = Expression.Create(value); } }
+		Expression _Filter;
 
 		protected override void BeginProcessing()
 		{
-			if (Filter == null)
+			if (_Filter == null)
 			{
 				foreach (var doc in Collection.FindAll())
 					WriteObject(Actor.ToObject(doc));
 			}
 			else
 			{
-				var param = new InputParameters(Parameters);
-				foreach (var doc in Collection.Find(param.Expression(Filter)))
+				foreach (var doc in Collection.Find(_Filter.BsonExpression))
 					WriteObject(Actor.ToObject(doc));
 			}
 		}

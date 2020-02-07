@@ -7,8 +7,8 @@ using System.Management.Automation;
 
 namespace Ldbc.Commands
 {
-	[Cmdlet(VerbsCommon.Remove, "LiteData")]
-	public sealed class RemoveDataCommand : Abstract
+	[Cmdlet(VerbsData.Update, "LiteData")]
+	public sealed class UpdateDataCommand : Abstract
 	{
 		[Parameter(Position = 0, Mandatory = true)]
 		public ILiteCollection<BsonDocument> Collection { get; set; }
@@ -17,12 +17,16 @@ namespace Ldbc.Commands
 		public object[] Filter { set { _Filter = Expression.Create(value); } }
 		Expression _Filter;
 
+		[Parameter(Position = 2, Mandatory = true)]
+		public object[] Update { set { _Update = Expression.Create(value); } }
+		Expression _Update;
+
 		[Parameter]
 		public SwitchParameter Result { get; set; }
 
 		protected override void BeginProcessing()
 		{
-			var count = Collection.DeleteMany(_Filter.BsonExpression);
+			var count = Collection.UpdateMany(_Update.BsonExpression, _Filter.BsonExpression);
 			if (Result)
 				WriteObject(count);
 		}

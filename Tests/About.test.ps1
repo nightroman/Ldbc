@@ -11,9 +11,9 @@ function DemoAddGetRemove {
 		$data = @{Name = 'John'}, @{Name = 'Mary'}
 		$data | Add-LiteData $test
 
-		# find using the filter with parameters
+		# find using filter with parameters
 		# ~> {"_id":1,"Name":"John"}
-		$r = Get-LiteData $test '$.Name = @param1' @{param1 = 'John'}
+		$r = Get-LiteData $test '$.Name = @Name', @{Name = 'John'}
 		"$r"
 
 		# remove one document

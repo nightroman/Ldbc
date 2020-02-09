@@ -24,3 +24,48 @@ task Result {
 		equals "$r" '{"_id":1,"p1":1} {"_id":2,"p1":2} {"_id":3,"p1":3} {"_id":4,"p1":4}'
 	}
 }
+
+task Batch {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test
+
+		try {
+			# add batch with duplicated keys
+			@{_id=1}, @{_id=1} | Add-LiteData $test -Batch
+			throw
+		}
+		catch {
+			equals "$_" "Cannot insert duplicate key in unique index '_id'. The duplicate value is '1'."
+		}
+
+		# batch is undone
+		equals $test.Count() 0
+
+		# add normal batch
+		$r = @{_id=1}, @{_id=2} | Add-LiteData $test -Batch -Result
+		equals $r 2
+		equals $test.Count() 2
+	}
+}
+
+task AddWithError {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test
+		try {
+			# add two with duplicated keys
+			@{_id=1}, @{_id=1} | Add-LiteData $test
+			throw
+		}
+		catch {
+			equals "$_" "Cannot insert duplicate key in unique index '_id'. The duplicate value is '1'."
+		}
+
+		# one document is still added
+		equals $test.Count() 1
+
+		# add two with duplicated keys and one more, ignore errors
+		$r1, $r2 = @{_id=2}, @{_id=2}, @{_id=3} | Add-LiteData $test -ErrorAction Ignore -Result
+		equals $r1 2
+		equals $r2 3
+	}
+}

@@ -8,21 +8,18 @@ function DemoAddGetRemove {
 		$test = Get-LiteCollection Test Int32
 
 		# add two documents
-		$data = @{Name = 'John'}, @{Name = 'Mary'}
-		$data | Add-LiteData $test
+		@{Name = 'John'}, @{Name = 'Mary'} | Add-LiteData $test
 
 		# find using filter with parameters
-		# ~> {"_id":1,"Name":"John"}
 		$r = Get-LiteData $test '$.Name = @Name', @{Name = 'John'}
-		"$r"
+		"$r" # {"_id":1,"Name":"John"}
 
 		# remove one document
 		Remove-LiteData $test '$._id = 1'
 
-		# get all remaining documents
-		# ~> {"_id":2,"Name":"Mary"}
+		# get all documents
 		$r = Get-LiteData $test
-		"$r"
+		"$r" # {"_id":2,"Name":"Mary"}
 	}
 }
 
@@ -32,18 +29,16 @@ function DemoSqlCommands {
 		# add two documents
 		Invoke-LiteCommand 'INSERT INTO Test : INT VALUES {Name: "John"}, {Name: "Mary"}' -Quiet
 
-		# find using the filter with parameters
-		# ~> {"_id":1,"Name":"John"}
+		# find using WHERE with parameters
 		$r = Invoke-LiteCommand 'SELECT $ FROM Test WHERE $.Name = @param1' @{param1 = 'John'}
-		"$r"
+		"$r" # {"_id":1,"Name":"John"}
 
 		# remove one document
 		Invoke-LiteCommand 'DELETE Test WHERE $._id = 1' -Quiet
 
-		# get all remaining documents
-		# ~> {"_id":2,"Name":"Mary"}
+		# get all documents
 		$r = Invoke-LiteCommand 'SELECT $ FROM Test'
-		"$r"
+		"$r" # {"_id":2,"Name":"Mary"}
 	}
 }
 

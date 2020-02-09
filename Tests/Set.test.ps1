@@ -26,6 +26,20 @@ task Basic {
 	}
 }
 
+#TODO fixed in LiteDB master, wait, convert to batch test
+task NRE {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test
+		try {
+			@{_id=1; n=1} | Set-LiteData $test -Batch
+			throw
+		}
+		catch {
+			$_
+		}
+	}
+}
+
 #?? https://github.com/mbdavid/LiteDB/issues/1451
 task UpdateInMissingCollection {
 	Use-LiteDatabase :memory: {

@@ -3,6 +3,8 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 
 using LiteDB;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 
 namespace Ldbc.Commands
@@ -13,10 +15,8 @@ namespace Ldbc.Commands
 		[Parameter(Position = 0, Mandatory = true)]
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
-		//! `get` is needed for PS, check null later =1=
 		[Parameter(Position = 1, ValueFromPipeline = true)]
-		public object InputObject { get { return _InputObject; } set { if (value != null) _InputObject = Actor.ToBsonDocument(value); } }
-		BsonDocument _InputObject;
+		public object InputObject { get; set; }
 
 		[Parameter]
 		public SwitchParameter Add { get; set; }
@@ -24,34 +24,58 @@ namespace Ldbc.Commands
 		[Parameter]
 		public SwitchParameter Result { get; set; }
 
+		[Parameter]
+		public SwitchParameter Batch { get; set; }
+		List<object> _batch;
+
 		int _count = 0;
+
+		protected override void BeginProcessing()
+		{
+			if (Batch)
+				_batch = new List<object>();
+		}
 
 		protected override void ProcessRecord()
 		{
-			if (_InputObject == null) //=1=
+			if (InputObject == null)
 				throw new PSArgumentException(Res.InputDocNull);
+
+			if (Batch)
+			{
+				_batch.Add(InputObject);
+				return;
+			}
 
 			try
 			{
 				if (Add)
 				{
-					if (Collection.Upsert(_InputObject))
+					if (Collection.Upsert(Actor.ToBsonDocument(InputObject)))
 						++_count;
 				}
 				else
 				{
-					if (Collection.Update(_InputObject))
+					if (Collection.Update(Actor.ToBsonDocument(InputObject)))
 						++_count;
 				}
 			}
 			catch (LiteException exn)
 			{
-				WriteException(exn, _InputObject);
+				WriteException(exn, InputObject);
 			}
 		}
 
 		protected override void EndProcessing()
 		{
+			if (Batch)
+			{
+				if (Add)
+					_count = Collection.Upsert(_batch.Select(Actor.ToBsonDocument));
+				else
+					_count = Collection.Update(_batch.Select(Actor.ToBsonDocument));
+			}
+
 			if (Result)
 				WriteObject(_count);
 		}

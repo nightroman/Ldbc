@@ -18,8 +18,29 @@ namespace Ldbc.Commands
 		public object[] Filter { set { _Filter = Expression.Create(value); } }
 		Expression _Filter;
 
+		[Parameter]
+		public SwitchParameter Count { get; set; }
+
+		void DoCount()
+		{
+			if (_Filter == null)
+			{
+				WriteObject(Collection.Count());
+			}
+			else
+			{
+				WriteObject(Collection.Count(_Filter.BsonExpression));
+			}
+		}
+
 		protected override void BeginProcessing()
 		{
+			if (Count)
+			{
+				DoCount();
+				return;
+			}
+
 			if (_Filter == null)
 			{
 				foreach (var doc in Collection.FindAll())

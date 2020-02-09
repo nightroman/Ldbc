@@ -1,5 +1,11 @@
 # Ldbc Release Notes
 
+## v0.3.0
+
+- New cmdlet `Test-LiteData`
+- New switch `Count` of `Get-LiteData`
+- New switch `Batch` of `Add-LiteData`, `Set-LiteData` (~50% faster)
+
 ## v0.2.0
 
 - New cmdlets `Set-LiteData`, `Update-LiteData`

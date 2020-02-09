@@ -4,6 +4,8 @@
 
 using LiteDB;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Management.Automation;
 
 namespace Ldbc.Commands
@@ -20,12 +22,24 @@ namespace Ldbc.Commands
 		[Parameter]
 		public SwitchParameter Result { get; set; }
 
+		[Parameter]
+		public SwitchParameter Batch { get; set; }
+		List<object> _batch;
+
+		protected override void BeginProcessing()
+		{
+			if (Batch)
+				_batch = new List<object>();
+		}
+
 		protected override void ProcessRecord()
 		{
 			if (InputObject == null)
+				throw new PSArgumentException(Res.InputDocNull);
+
+			if (Batch)
 			{
-				if (Result)
-					WriteObject(null);
+				_batch.Add(InputObject);
 				return;
 			}
 
@@ -44,6 +58,16 @@ namespace Ldbc.Commands
 			{
 				WriteException(exn, InputObject);
 			}
+		}
+
+		protected override void EndProcessing()
+		{
+			if (!Batch)
+				return;
+
+			var count = Collection.Insert(_batch.Select(Actor.ToBsonDocument));
+			if (Result)
+				WriteObject(count);
 		}
 	}
 }

@@ -37,6 +37,12 @@ $DocumentInputs = @(
 	}
 )
 
+$BatchParameter = @'
+Tells to collect all input data and process as a batch.
+This works faster and provides an automatic transaction.
+But it may require more memory and get less information.
+'@
+
 ### Get-LiteData
 @{
 	command = 'Get-LiteData'
@@ -47,6 +53,7 @@ The cmdlets gets all or specified by the filter documents from the collection.
 	parameters = @{
 		Collection = $CollectionParameter
 		Filter = $FilterParameter
+		Count = 'Tells to count the documents and return the number.'
 	}
 	outputs = @(
 		@{
@@ -94,13 +101,14 @@ Use the pipeline for several input documents.
 	parameters = @{
 		Collection = $CollectionParameter
 		InputObject = 'The input document.'
-		Result = 'Tells to output document _id values.'
+		Batch = $BatchParameter
+		Result = 'Tells to output document _id values or document count.'
 	}
 	inputs = $DocumentInputs
 	outputs = @(
 		@{
-			type = 'object'
-			description = 'None or _id values.'
+			type = '[object]'
+			description = 'None, _id values, document count.'
 		}
 	)
 	examples = @(
@@ -164,6 +172,7 @@ If the old document does not exist then the new is added if Add is set.
 		Add = @'
 Tells to add the new document if the old does not exist.'
 '@
+		Batch = $BatchParameter
 		Result = @'
 Tells to output
 the number of replaced documents (Add is not set) or
@@ -206,6 +215,26 @@ the number of added documents (Add is set).
 		@{ text = 'Get-LiteData' }
 		@{ text = 'Remove-LiteData' }
 		@{ text = 'Update-LiteData' }
+	)
+}
+
+### Test-LiteData
+@{
+	command = 'Test-LiteData'
+	synopsis = 'Gets true if the query returns any document.'
+	description = @'
+The cmdlet gets true if the specified query returns any document.
+This method does not deserialize any document.
+'@
+	parameters = @{
+		Collection = $CollectionParameter
+		Filter = $FilterParameter
+	}
+	outputs = @(
+		@{
+			type = '[bool'
+			description = 'True if the query returns any document.'
+		}
 	)
 }
 

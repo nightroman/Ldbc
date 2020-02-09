@@ -87,8 +87,14 @@ CopyXml
 task CopyXml {
 	$xml = [xml](Get-Content Src\$ModuleName.csproj)
 	$_ = $xml.SelectSingleNode('//PackageReference[@Include="LiteDB"]')
-	$from = "$env:USERPROFILE\.nuget\packages\{0}\{1}\lib\net45" -f $_.Include, $_.Version
-	Copy-Item $from\*.xml $ModuleRoot
+	if ($_) {
+		$from = "$env:USERPROFILE\.nuget\packages\{0}\{1}\lib\net45" -f $_.Include, $_.Version
+		Copy-Item $from\*.xml $ModuleRoot
+	}
+	else {
+		# when reference LiteDB.csproj
+		Write-Warning "Missing PackageReference LiteDB"
+	}
 }
 
 # Synopsis: Remove temp files.

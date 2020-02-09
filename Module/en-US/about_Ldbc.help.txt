@@ -25,6 +25,7 @@ LONG DESCRIPTION
         Add-LiteData
         Get-LiteData
         Set-LiteData
+        Test-LiteData
         Remove-LiteData
         Update-LiteData
             Operate on documents in the collection

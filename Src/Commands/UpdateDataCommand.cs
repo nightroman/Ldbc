@@ -14,11 +14,11 @@ namespace Ldbc.Commands
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1, Mandatory = true)]
-		public object[] Filter { set { _Filter = Expression.Create(value); } }
+		public object Filter { set { _Filter = Expression.Create(value); } }
 		Expression _Filter;
 
 		[Parameter(Position = 2, Mandatory = true)]
-		public object[] Update { set { _Update = Expression.Create(value); } }
+		public object Update { set { _Update = Expression.Create(value); } }
 		Expression _Update;
 
 		[Parameter]

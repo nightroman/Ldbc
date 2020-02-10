@@ -48,33 +48,24 @@ namespace Ldbc
 			BsonExpression = BsonExpression.Create(expression, parameters2);
 		}
 
-		internal static Expression Create(object[] input)
+		internal static Expression Create(object value)
 		{
-			if (input == null)
-				throw new ArgumentNullException(nameof(input));
+			if (value == null)
+				throw new ArgumentNullException(nameof(value));
 
-			if (input.Length == 2)
-				return new Expression((string)input[0], (IDictionary)input[1]);
-
-			if (input.Length != 1)
-				throw new ArgumentException("Expected one or two items.");
-
-			if (input[0] is string text)
-			{
-				return new Expression(text);
-			}
-			else if (input[0] is Expression expr1)
-			{
+			if (value is Expression expr1)
 				return expr1;
-			}
-			else if (input[0] is BsonExpression expr2)
-			{
+
+			if (value is BsonExpression expr2)
 				return new Expression(expr2);
-			}
-			else
-			{
-				throw new ArgumentException(Res.CannotConvert2(input[0], "expression"));
-			}
+
+			if (value is string text)
+				return new Expression(text);
+
+			if (value is IList list && list.Count == 2)
+				return new Expression((string)list[0], (IDictionary)list[1]);
+
+			throw new ArgumentException(Res.CannotConvert2(value, "expression"));
 		}
 	}
 }

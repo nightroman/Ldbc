@@ -1,5 +1,18 @@
 # Ldbc Release Notes
 
+## v0.4.0
+
+LiteDB 5.0.2
+
+`Get-LiteData`
+
+- New parameters: `First`, `Last`, `Skip`
+- New parameter `As`, for now just "PS" for PS custom objects.
+
+`Add-LiteData`, `Set-LiteData`
+
+- Rename `Batch` switches to more idiomatic `Bulk`.
+
 ## v0.3.0
 
 - New cmdlet `Test-LiteData`

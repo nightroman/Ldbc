@@ -14,8 +14,8 @@ function DemoAddGetRemove {
 		$r = Get-LiteData $test '$.Name = @Name', @{Name = 'John'}
 		"$r" # {"_id":1,"Name":"John"}
 
-		# remove one document
-		Remove-LiteData $test '$._id = 1'
+		# remove using filter with parameters
+		Remove-LiteData $test '$._id = @_id', @{_id = 1}
 
 		# get all documents
 		$r = Get-LiteData $test
@@ -33,12 +33,26 @@ function DemoSqlCommands {
 		$r = Invoke-LiteCommand 'SELECT $ FROM Test WHERE $.Name = @param1' @{param1 = 'John'}
 		"$r" # {"_id":1,"Name":"John"}
 
-		# remove one document
-		Invoke-LiteCommand 'DELETE Test WHERE $._id = 1' -Quiet
+		# remove using WHERE with parameters
+		Invoke-LiteCommand 'DELETE Test WHERE $._id = @_id' @{_id = 1} -Quiet
 
 		# get all documents
 		$r = Invoke-LiteCommand 'SELECT $ FROM Test'
 		"$r" # {"_id":2,"Name":"Mary"}
+	}
+}
+
+# README example
+function PSCustomObject {
+	Use-LiteDatabase :memory: {
+		# get the collection
+		$test = Get-LiteCollection Test
+
+		# get PS objects, select some properties, insert
+		Get-ChildItem | Select-Object Name, Mode, Length | Add-LiteData $test
+
+		# get back PS custom objects
+		Get-LiteData $test -As PS
 	}
 }
 
@@ -56,6 +70,14 @@ task DemoSqlCommands {
 	equals $r.Count 2
 	equals $r[0] '{"_id":1,"Name":"John"}'
 	equals $r[1] '{"_id":2,"Name":"Mary"}'
+}
+
+# test example
+task PSCustomObject {
+	Set-StrictMode -Off
+	$r = PSCustomObject
+	$r | Out-String
+	equals $r[0].GetType().Name PSCustomObject
 }
 
 # warm up and time examples

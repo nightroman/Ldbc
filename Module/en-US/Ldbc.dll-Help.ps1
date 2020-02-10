@@ -20,11 +20,18 @@ The database instance. If it is omitted then the variable $Database is expected.
 Use New-LiteDatabase or Use-LiteDatabase in order to get the database instance.
 '@
 
-$FilterParameter = @'
-Specifies the filter expression and optional parameters dictionary separated by a comma.
+$ExpressionHelp = @'
+An expression may be string, Ldbc.Expression, or LiteDB.BsonExpression.
 
-The expression is either a string or existing Ldbc.Expression or LiteDB.BsonExpression.
+A string expression with parameters is followed by a dictionary with parameter values, e.g.
+
+	'.. @age .. @income ..', @{age = 40; income = 80}
 '@
+
+$FilterParameter = $(
+	'Specifies the filter expression.'
+	$ExpressionHelp
+)
 
 $ParametersParameter = @'
 Specifies the expression named parameters (IDictionary) or indexed arguments (IList or object).
@@ -37,10 +44,10 @@ $DocumentInputs = @(
 	}
 )
 
-$BatchParameter = @'
-Tells to collect all input data and process as a batch.
+$BulkParameter = @'
+Tells to collect input data and invoke bulk processing.
 This works faster and provides an automatic transaction.
-But it may require more memory and get less information.
+But this requires more memory and gets less information.
 '@
 
 ### Get-LiteData
@@ -54,6 +61,24 @@ The cmdlets gets all or specified by the filter documents from the collection.
 		Collection = $CollectionParameter
 		Filter = $FilterParameter
 		Count = 'Tells to count the documents and return the number.'
+		First = @'
+Specifies the number of first documents to be returned.
+Non positive values are ignored.
+'@
+		Last = @'
+Specifies the number of last documents to be returned.
+Non positive values are ignored.
+'@
+		Skip = @'
+Specifies the number of documents to skip from the beginning or from the end if
+Last is specified. Skipping is applied to results before taking First or Last.
+Non positive values are ignored.
+'@
+		As = @'
+Specifies the type of returned objects.
+By default, it is Ldbc.Dictionary, PowerShell friendly wrapper of BsonDocument.
+The only custom type for now is "PS", which stands for PowerShell custom object.
+'@
 	}
 	outputs = @(
 		@{
@@ -101,7 +126,7 @@ Use the pipeline for several input documents.
 	parameters = @{
 		Collection = $CollectionParameter
 		InputObject = 'The input document.'
-		Batch = $BatchParameter
+		Bulk = $BulkParameter
 		Result = 'Tells to output document _id values or document count.'
 	}
 	inputs = $DocumentInputs
@@ -172,7 +197,7 @@ If the old document does not exist then the new is added if Add is set.
 		Add = @'
 Tells to add the new document if the old does not exist.'
 '@
-		Batch = $BatchParameter
+		Bulk = $BulkParameter
 		Result = @'
 Tells to output
 the number of replaced documents (Add is not set) or
@@ -290,7 +315,10 @@ update expression.
 	parameters = @{
 		Collection = $CollectionParameter
 		Filter = $FilterParameter
-		Update = 'Specifies the transformation expression.'
+		Update = $(
+			'Specifies the transformation expression.'
+			$ExpressionHelp
+		)
 		Result = 'Tells to output the number of updated documents.'
 	}
 	outputs = @(

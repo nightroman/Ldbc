@@ -51,8 +51,8 @@ Use-LiteDatabase :memory: {
     $r = Get-LiteData $test '$.Name = @Name', @{Name = 'John'}
     "$r" # {"_id":1,"Name":"John"}
 
-    # remove one document
-    Remove-LiteData $test '$._id = 1'
+    # remove using filter with parameters
+    Remove-LiteData $test '$._id = @_id', @{_id = 1}
 
     # get all documents
     $r = Get-LiteData $test
@@ -71,12 +71,27 @@ Use-LiteDatabase :memory: {
     $r = Invoke-LiteCommand 'SELECT $ FROM Test WHERE $.Name = @param1' @{param1 = 'John'}
     "$r" # {"_id":1,"Name":"John"}
 
-    # remove one document
-    Invoke-LiteCommand 'DELETE Test WHERE $._id = 1' -Quiet
+    # remove using WHERE with parameters
+    Invoke-LiteCommand 'DELETE Test WHERE $._id = @_id' @{_id = 1} -Quiet
 
     # get all documents
     $r = Invoke-LiteCommand 'SELECT $ FROM Test'
     "$r" # {"_id":2,"Name":"Mary"}
+}
+```
+
+(c) store some PS objects and get back as PS custom objects
+
+```powershell
+Use-LiteDatabase :memory: {
+    # get the collection
+    $test = Get-LiteCollection Test
+
+    # get PS objects, select some properties, insert
+    Get-ChildItem | Select-Object Name, Mode, Length | Add-LiteData $test
+
+    # get back PS custom objects
+    Get-LiteData $test -As PS
 }
 ```
 
@@ -87,6 +102,28 @@ for more technical examples.
 
 Read LiteDB [DOCS](https://www.litedb.org/docs/). Some LiteDB API may and
 should be used directly. Ldbc is the helper, not replacement.
+
+## LiteDB methods and module commands
+
+| LiteDB | Module  | Output
+| :----- | :-----  | :-----
+| **Database** | |
+| LiteDatabase | New-LiteDatabase | database (needs Dispose)
+| LiteDatabase | Use-LiteDatabase {..} | $Database (auto Dispose)
+| GetCollection | Get-LiteCollection | collection instance
+| Execute | Invoke-LiteCommand | values, documents
+| BeginTrans | Use-LiteTransaction {..} | none
+| + Commit | (success) |
+| + Rollback | (failure) |
+| **Collection** | |
+| Count | Get-LiteData -Count | count
+| Exists | Test-LiteData | true or false
+| Find | Get-LiteData | documents
+| Insert | Add-LiteData | none, id, count
+| Update | Set-LiteData | none, count
+| Upsert | Set-LiteData -Add | none, count
+| UpdateMany | Update-LiteData | none, count
+| DeleteMany | Remove-LiteData | none, count
 
 ## Work in progress
 

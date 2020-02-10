@@ -15,7 +15,7 @@ namespace Ldbc.Commands
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1)]
-		public object[] Filter { set { _Filter = Expression.Create(value); } }
+		public object Filter { set { _Filter = Expression.Create(value); } }
 		Expression _Filter;
 
 		protected override void BeginProcessing()

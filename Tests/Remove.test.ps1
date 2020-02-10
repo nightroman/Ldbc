@@ -2,41 +2,45 @@
 Import-Module Ldbc
 
 # https://github.com/mbdavid/LiteDB/issues/1445
-task TODO_FilterWithParameters {
+task FilterWithParameters {
 	Use-LiteDatabase :memory: {
 		$test = Get-LiteCollection Test
 
-		# add document
-		Add-LiteData $test @{_id = 1; p1 = 1}
+		# add data
+		@{_id = 1}, @{_id = 2} | Add-LiteData $test
 
 		# remove using filter with parameter
-		$r = Remove-LiteData $test '$._id = @id', @{id = 1} -Result
-		if (1 -eq $r) {
-			Write-Warning TODO_FilterWithParameters-1
-			return
-		}
-		equals $r 0 #! current wrong but known case
+		$r = Remove-LiteData $test '$._id = @_id', @{_id = 1} -Result
+		equals $r 1 #! was 0
 
 		# remove using hardcoded filter
-		$r = Remove-LiteData $test '$._id = 1' -Result
+		$r = Remove-LiteData $test '$._id = 2' -Result
 		equals $r 1
+
+		equals $test.Count() 0
 	}
 }
 
-task TODO_DELETE_WithParameters {
+# https://github.com/mbdavid/LiteDB/issues/1445
+task DELETE_WithParameters {
 	Use-LiteDatabase :memory: {
 		$test = Get-LiteCollection Test Int32
 
-		# add document
-		Add-LiteData $test @{_id = 1; p1 = 1}
+		# add data
+		@{_id = 1}, @{_id = 2}, @{_id = 3} | Add-LiteData $test
 
-		$r = Invoke-LiteCommand 'DELETE test WHERE $._id = @0' 1
-		if (1 -eq $r) {
-			Write-Warning TODO_DELETE_WithParameters-1
-			return
-		}
+		# parameter dictionary
+		$r = Invoke-LiteCommand 'DELETE test WHERE $._id = @_id' @{_id = 1}
+		equals $r 1 #! was 0
 
-		$r = Invoke-LiteCommand 'DELETE test WHERE $._id = 1' 1
+		# parameter argument
+		$r = Invoke-LiteCommand 'DELETE test WHERE $._id = @0' 2
+		equals $r 1 #! was 0
+
+		# hardcoded
+		$r = Invoke-LiteCommand 'DELETE test WHERE $._id = 3'
 		equals $r 1
+
+		equals $test.Count() 0
 	}
 }

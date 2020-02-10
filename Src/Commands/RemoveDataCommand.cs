@@ -14,7 +14,7 @@ namespace Ldbc.Commands
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1, Mandatory = true)]
-		public object[] Filter { set { _Filter = Expression.Create(value); } }
+		public object Filter { set { _Filter = Expression.Create(value); } }
 		Expression _Filter;
 
 		[Parameter]

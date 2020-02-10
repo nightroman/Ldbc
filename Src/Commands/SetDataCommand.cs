@@ -25,15 +25,15 @@ namespace Ldbc.Commands
 		public SwitchParameter Result { get; set; }
 
 		[Parameter]
-		public SwitchParameter Batch { get; set; }
-		List<object> _batch;
+		public SwitchParameter Bulk { get; set; }
+		List<object> _bulk;
 
 		int _count = 0;
 
 		protected override void BeginProcessing()
 		{
-			if (Batch)
-				_batch = new List<object>();
+			if (Bulk)
+				_bulk = new List<object>();
 		}
 
 		protected override void ProcessRecord()
@@ -41,9 +41,9 @@ namespace Ldbc.Commands
 			if (InputObject == null)
 				throw new PSArgumentException(Res.InputDocNull);
 
-			if (Batch)
+			if (Bulk)
 			{
-				_batch.Add(InputObject);
+				_bulk.Add(InputObject);
 				return;
 			}
 
@@ -68,12 +68,12 @@ namespace Ldbc.Commands
 
 		protected override void EndProcessing()
 		{
-			if (Batch)
+			if (Bulk)
 			{
 				if (Add)
-					_count = Collection.Upsert(_batch.Select(Actor.ToBsonDocument));
+					_count = Collection.Upsert(_bulk.Select(Actor.ToBsonDocument));
 				else
-					_count = Collection.Update(_batch.Select(Actor.ToBsonDocument));
+					_count = Collection.Update(_bulk.Select(Actor.ToBsonDocument));
 			}
 
 			if (Result)

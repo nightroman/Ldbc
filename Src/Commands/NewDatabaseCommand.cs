@@ -14,6 +14,7 @@ namespace Ldbc.Commands
 	{
 		protected const string nsConnectionString = "ConnectionString";
 		const string nsStream = "Stream";
+		const string nameMemoryDB = ":memory:";
 
 		[Parameter(Position = 0, ParameterSetName = nsConnectionString)]
 		[ValidateNotNull]
@@ -32,7 +33,13 @@ namespace Ldbc.Commands
 			else
 			{
 				if (ConnectionString == null)
-					ConnectionString = new ConnectionString(":memory:");
+				{
+					ConnectionString = new ConnectionString(nameMemoryDB);
+				}
+				else if (!ConnectionString.Filename.Equals(nameMemoryDB, System.StringComparison.OrdinalIgnoreCase))
+				{
+					ConnectionString.Filename = GetUnresolvedProviderPathFromPSPath(ConnectionString.Filename);
+				}
 
 				return new LiteDatabase(ConnectionString);
 			}

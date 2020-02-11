@@ -64,23 +64,17 @@ namespace Ldbc
 		{
 			return _array.Select(Actor.ToObject).GetEnumerator();
 		}
-		public bool IsSynchronized { get { return false; } }
-		public object SyncRoot { get { return null; } }
-		public int Count { get { return _array.Count; } }
+		public bool IsSynchronized => false;
+		public object SyncRoot => null;
+		public int Count => _array.Count;
 		public void CopyTo(Array array, int index)
 		{
 			if (array == null) throw new ArgumentNullException(nameof(array));
 			foreach (var v in this)
 				array.SetValue(v, index++);
 		}
-		public bool IsFixedSize
-		{
-			get { return IsReadOnly; }
-		}
-		public bool IsReadOnly
-		{
-			get { return false; }
-		}
+		public bool IsFixedSize => _array.IsReadOnly;
+		public bool IsReadOnly => _array.IsReadOnly;
 		public object this[int index]
 		{
 			get

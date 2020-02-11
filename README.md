@@ -112,7 +112,7 @@ should be used directly. Ldbc is the helper, not replacement.
 | LiteDatabase | Use-LiteDatabase {..} | $Database (auto Dispose)
 | GetCollection | Get-LiteCollection | collection instance
 | Execute | Invoke-LiteCommand | values, documents
-| BeginTrans | Use-LiteTransaction {..} | none
+| BeginTrans | Use-LiteTransaction {..} | ..
 | + Commit | (success) |
 | + Rollback | (failure) |
 | **Collection** | |

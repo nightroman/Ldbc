@@ -51,8 +51,7 @@ namespace Ldbc
 		}
 		public string Print()
 		{
-			var json = JsonSerializer.Serialize(_document);
-			return MyJson.Format(json);
+			return DocumentPrinter.Print(_document);
 		}
 		//! Do not use name Parse or PS converts all types to strings and produces not clear errors.
 		//! This would be fine on .Parse(X), but PS calls Parse on `[Mdbc.Dictionary]X`, bad.
@@ -87,14 +86,8 @@ namespace Ldbc
 		#endregion
 
 		#region Common
-		public int Count
-		{
-			get { return _document.Count; }
-		}
-		public bool IsReadOnly
-		{
-			get { return false; }
-		}
+		public int Count => _document.Count;
+		public bool IsReadOnly => _document.IsReadOnly;
 		public void Clear()
 		{
 			_document.Clear();
@@ -102,14 +95,8 @@ namespace Ldbc
 		#endregion
 
 		#region ICollection
-		bool ICollection.IsSynchronized
-		{
-			get { return false; }
-		}
-		object ICollection.SyncRoot
-		{
-			get { return null; }
-		}
+		bool ICollection.IsSynchronized => false;
+		object ICollection.SyncRoot => null;
 		void ICollection.CopyTo(Array array, int index)
 		{
 			throw new NotImplementedException();
@@ -145,35 +132,17 @@ namespace Ldbc
 				_that = that;
 			}
 			void IDisposable.Dispose() { }
-			public KeyValuePair<string, object> Current
-			{
-				get
-				{
-					return new KeyValuePair<string, object>(_that.Current.Key, Actor.ToObject(_that.Current.Value));
-				}
-			}
-			object IEnumerator.Current { get { return Current; } }
+			public KeyValuePair<string, object> Current => new KeyValuePair<string, object>(_that.Current.Key, Actor.ToObject(_that.Current.Value));
+			object IEnumerator.Current => Current;
 			public bool MoveNext() { return _that.MoveNext(); }
 			public void Reset() { _that.Reset(); }
 		}
 		#endregion
 
 		#region IDictionary
-		bool IDictionary.IsFixedSize
-		{
-			get { return false; }
-		}
-		ICollection IDictionary.Keys
-		{
-			get { return _document.Keys.ToArray(); }
-		}
-		ICollection IDictionary.Values
-		{
-			get
-			{
-				return _document.Values.Select(Actor.ToObject).ToArray();
-			}
-		}
+		bool IDictionary.IsFixedSize => _document.IsReadOnly;
+		ICollection IDictionary.Keys => _document.Keys.ToArray();
+		ICollection IDictionary.Values => _document.Values.Select(Actor.ToObject).ToArray();
 		object IDictionary.this[object key]
 		{
 			get
@@ -217,39 +186,18 @@ namespace Ldbc
 			{
 				_that = that;
 			}
-			public DictionaryEntry Entry
-			{
-				get
-				{
-					return new DictionaryEntry(_that.Current.Key, Actor.ToObject(_that.Current.Value));
-				}
-			}
-			public object Key { get { return _that.Current.Key; } }
-			public object Value
-			{
-				get
-				{
-					return Actor.ToObject(_that.Current.Value);
-				}
-			}
-			public object Current { get { return Entry; } }
+			public DictionaryEntry Entry => new DictionaryEntry(_that.Current.Key, Actor.ToObject(_that.Current.Value));
+			public object Key => _that.Current.Key;
+			public object Value => Actor.ToObject(_that.Current.Value);
+			public object Current => Entry;
 			public void Reset() { _that.Reset(); }
 			public bool MoveNext() { return _that.MoveNext(); }
 		}
 		#endregion
 
 		#region IDictionary2
-		public ICollection<string> Keys
-		{
-			get { return _document.Keys.ToArray(); }
-		}
-		public ICollection<object> Values
-		{
-			get
-			{
-				return _document.Values.Select(Actor.ToObject).ToArray();
-			}
-		}
+		public ICollection<string> Keys => _document.Keys.ToArray();
+		public ICollection<object> Values => _document.Values.Select(Actor.ToObject).ToArray();
 		public object this[string key]
 		{
 			get

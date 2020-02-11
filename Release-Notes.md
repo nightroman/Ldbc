@@ -1,12 +1,17 @@
 # Ldbc Release Notes
 
+## v0.4.1
+
+- `*-LiteDatabase` - resolve relative file paths
+- `Ldbc.Dictionary.Print()` - improve JSON formatting
+
 ## v0.4.0
 
 LiteDB 5.0.2
 
 `Get-LiteData`
 
-- New parameters: `First`, `Last`, `Skip`
+- New parameters: `First`, `Last`, `Skip`.
 - New parameter `As`, for now just "PS" for PS custom objects.
 
 `Add-LiteData`, `Set-LiteData`

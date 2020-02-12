@@ -41,3 +41,8 @@ function New-BsonBag {
 	$m.maxKey = [LiteDB.BsonValue]::MaxValue
 	$m
 }
+
+function Get-MD5($Text) {
+	$bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
+	[guid][System.Security.Cryptography.MD5]::Create().ComputeHash($bytes)
+}

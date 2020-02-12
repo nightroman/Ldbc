@@ -29,6 +29,34 @@ task Basic {
 	}
 }
 
+task As {
+	Use-LiteDatabase :memory: {
+		# INSERT
+		Invoke-LiteCommand 'INSERT INTO test VALUES {_id: 1, p: 1}' -Quiet
+
+		# SELECT with -As
+		$r = Invoke-LiteCommand 'SELECT $ FROM test' -As PS
+		$r | Out-String
+		equals $r.GetType().Name PSCustomObject
+	}
+}
+
+task Collection {
+	Use-LiteDatabase :memory: {
+		# way 1
+		$name1 = ''
+		$r = Invoke-LiteCommand 'SELECT $ FROM MyCollection' -Collection ([ref]$name1)
+		equals $r $null
+		equals $name1 MyCollection
+
+		# way 2
+		$name2 = [ref]''
+		$r = Invoke-LiteCommand 'SELECT $ FROM MyCollection' -Collection $name2
+		equals $r $null
+		equals $name2.Value MyCollection
+	}
+}
+
 task CannotInsertWithParameter1 {
 	try {
 		Use-LiteDatabase :memory: {

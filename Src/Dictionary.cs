@@ -51,7 +51,7 @@ namespace Ldbc
 		}
 		public string Print()
 		{
-			return DocumentPrinter.Print(_document);
+			return MyJson.Print(_document);
 		}
 		//! Do not use name Parse or PS converts all types to strings and produces not clear errors.
 		//! This would be fine on .Parse(X), but PS calls Parse on `[Mdbc.Dictionary]X`, bad.

@@ -70,3 +70,28 @@ task FirstLastSkip {
 		equals "$r" '{"_id":4} {"_id":5}'
 	}
 }
+
+task Select {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test
+
+		Add-LiteData $test @{p1 = 1; p2 = 2; p3 = 3}
+
+		$r = Get-LiteData $test -Select '{s1:p3, s2:p1}'
+		equals "$r" '{"s1":3,"s2":1}'
+	}
+}
+
+task OrderBy {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test Int32
+
+		@{p=1}, @{p=3}, @{p=2} | Add-LiteData $test
+
+		$r = Get-LiteData $test -Select p -OrderBy p
+		equals "$r" '{"p":1} {"p":2} {"p":3}'
+
+		$r = Get-LiteData $test -Select p -OrderBy p -Order -1
+		equals "$r" '{"p":3} {"p":2} {"p":1}'
+	}
+}

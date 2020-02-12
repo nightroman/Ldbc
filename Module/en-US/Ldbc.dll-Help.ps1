@@ -45,9 +45,15 @@ $DocumentInputs = @(
 )
 
 $BulkParameter = @'
-Tells to collect input data and invoke bulk processing.
-This works faster and provides an automatic transaction.
-But this requires more memory and gets less information.
+Tells to collect documents from the pipeline and invoke bulk processing.
+This way works faster and provides an automatic transaction for the bulk.
+But it may require more memory and get less output and error information.
+'@
+
+$AsParameter = @'
+Specifies the type of returned documents.
+By default, it is Ldbc.Dictionary, PowerShell friendly wrapper of BsonDocument.
+The only custom type for now is "PS", which stands for PowerShell custom object.
 '@
 
 ### Get-LiteData
@@ -55,11 +61,12 @@ But this requires more memory and gets less information.
 	command = 'Get-LiteData'
 	synopsis = 'Gets data from the collection.'
 	description = @'
-The cmdlets gets all or specified by the filter documents from the collection.
+The cmdlets gets data specified by the parameters from the collection.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
 		Filter = $FilterParameter
+		As = $AsParameter
 		Count = 'Tells to count the documents and return the number.'
 		First = @'
 Specifies the number of first documents to be returned.
@@ -74,10 +81,14 @@ Specifies the number of documents to skip from the beginning or from the end if
 Last is specified. Skipping is applied to results before taking First or Last.
 Non positive values are ignored.
 '@
-		As = @'
-Specifies the type of returned objects.
-By default, it is Ldbc.Dictionary, PowerShell friendly wrapper of BsonDocument.
-The only custom type for now is "PS", which stands for PowerShell custom object.
+		Select = @'
+Specifies the projections that are applied to the results.
+'@
+		OrderBy = @'
+Specifies the sort expression.
+'@
+		Order = @'
+Specifies the sort direction, 1: ascending, -1: descending.
 '@
 	}
 	outputs = @(
@@ -370,7 +381,9 @@ supports parameters).
 		Command = 'Specifies the LiteDB SQL command.'
 		Database = $DatabaseParameter
 		Parameters = $ParametersParameter
+		As = $AsParameter
 		Quiet = 'Tells to omit the command output.'
+		Collection = 'The output [ref] of the command collection name.'
 	}
 	outputs = @(
 		@{

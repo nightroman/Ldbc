@@ -19,22 +19,26 @@ task DotNotation {
 
 task Json {
 	$d = New-BsonBag
+	$d.emptyArray = @()
+	$d.emptyDocument = @{}
 
 	# ToString() ~> compact JSON
 	$json1 = "$d"
 	$json2 = $d.ToString()
 	equals $json1 $json2
 	$json1
+	equals (Get-MD5 $json1) ([guid]'4863683c-996e-d132-cb17-9e6a0a25d089')
 
 	# parse compact JSON
 	$r = [Ldbc.Dictionary]::FromJson($json1)
 	equals $r $d
 
-	# Print() ~> formatted JSON
+	# Print() ~> pretty JSON
 	$json3 = $d.Print()
 	$json3
+	equals (Get-MD5 $json3) ([guid]'9c4b58fc-dc2e-dc7a-40b2-016e15fc0a14')
 
-	# parse formatted JSON
+	# parse pretty JSON
 	$r = [Ldbc.Dictionary]::FromJson($json3)
 	equals $r $d
 }

@@ -1,5 +1,10 @@
 # Ldbc Release Notes
 
+## v0.4.2
+
+- `Get-LiteData` - new parameters `Select`, `OrderBy`, `Order`
+- `Invoke-LiteCommand` - new parameters `As` (and `[ref] Collection` for special cases)
+
 ## v0.4.1
 
 - `*-LiteDatabase` - resolve relative file paths

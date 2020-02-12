@@ -3,6 +3,7 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 
 using LiteDB;
+using System;
 using System.Management.Automation;
 
 namespace Ldbc.Commands
@@ -23,6 +24,12 @@ namespace Ldbc.Commands
 		[Parameter]
 		public SwitchParameter Quiet { get; set; }
 
+		[Parameter]
+		public object As { get; set; }
+
+		[Parameter]
+		public PSReference Collection { get; set; }
+
 		protected override void BeginProcessing()
 		{
 			if (Database == null)
@@ -32,11 +39,42 @@ namespace Ldbc.Commands
 
 			using (var reader = param.Arguments == null ? Database.Execute(Command, param.Parameters) : Database.Execute(Command, param.Arguments))
 			{
+				if (Collection != null)
+					Collection.Value = reader.Collection;
+
 				if (Quiet)
 					return;
 
-				while (reader.Read())
-					WriteObject(Actor.ToObject(reader.Current));
+				// case: no As
+				if (As == null)
+				{
+					while (reader.Read())
+						WriteObject(Actor.ToObject(reader.Current));
+					return;
+				}
+
+				if (As is string s && s.Equals("PS", StringComparison.OrdinalIgnoreCase))
+				{
+					while (reader.Read())
+					{
+						var value = reader.Current;
+						switch (value.Type)
+						{
+							case BsonType.Document:
+								WriteObject(PSObjectSeializer.ReadCustomObject(value.AsDocument));
+								break;
+							case BsonType.Array:
+								WriteObject(PSObjectSeializer.ReadArray(value.AsArray));
+								break;
+							default:
+								WriteObject(Actor.ToObject(value));
+								break;
+						}
+					}
+					return;
+				}
+
+				throw new PSNotSupportedException("Parameter As must be just 'PS', for now.");
 			}
 		}
 	}

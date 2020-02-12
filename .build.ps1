@@ -152,7 +152,7 @@ task Version {
 }
 
 # Synopsis: Make the package in z\tools.
-task Package Build, TestHelp, Test, Test6, Markdown, {
+task Package Full, Markdown, {
 	remove z
 	$null = mkdir z\tools\$ModuleName
 
@@ -170,5 +170,10 @@ task PushPSGallery Package, Version, {
 },
 Clean
 
-# Synopsis: Build, test, and clean all.
-task . Build, Test, Test6, Clean
+# Synopsis: Fast dev round.
+task Fast Build, Help, Test, Clean
+
+# Synopsis: Full dev round.
+task Full Build, Help, TestHelp, Test, Test6, Clean
+
+task . Fast

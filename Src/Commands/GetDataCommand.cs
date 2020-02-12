@@ -22,6 +22,17 @@ namespace Ldbc.Commands
 		public object Filter { set { _Filter = Expression.Create(value); } }
 		Expression _Filter;
 
+		[Parameter(ParameterSetName = nsData)]
+		public object Select { set { _Select = Expression.Create(value); } }
+		Expression _Select;
+
+		[Parameter(ParameterSetName = nsData)]
+		public object OrderBy { set { _OrderBy = Expression.Create(value); } }
+		Expression _OrderBy;
+
+		[Parameter(ParameterSetName = nsData)]
+		public int Order { get; set; }
+
 		[Parameter(Mandatory = true, ParameterSetName = nsCount)]
 		public SwitchParameter Count { get; set; }
 
@@ -75,13 +86,27 @@ namespace Ldbc.Commands
 				return;
 
 			var query = Collection.Query();
+
+			// Filter
 			if (_Filter != null)
 				query = query.Where(_Filter.BsonExpression);
 
-			var result = query.Skip(Skip);
+			// OrderBy
+			if (_OrderBy != null)
+				query = query.OrderBy(_OrderBy.BsonExpression, Order < 0 ? -1 : 1);
+
+			// Select and Skip
+			ILiteQueryableResult<BsonDocument> result;
+			if (_Select != null)
+				result = query.Select(_Select.BsonExpression).Skip(Skip);
+			else
+				result = query.Skip(Skip);
+
+			// First
 			if (First > 0)
 				result = result.Limit(First);
 
+			// case: no As
 			if (As == null)
 			{
 				foreach (var doc in result.ToEnumerable())

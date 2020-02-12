@@ -31,7 +31,7 @@ namespace Ldbc
 				default: return value;
 			}
 		}
-		static IList ReadArray(BsonArray value)
+		internal static IList ReadArray(BsonArray value)
 		{
 			var list = new List<object>(value.Count);
 			for (int i = 0; i < value.Count; ++i)

@@ -34,10 +34,20 @@ task As {
 		# INSERT
 		Invoke-LiteCommand 'INSERT INTO test VALUES {_id: 1, p: 1}' -Quiet
 
-		# SELECT with -As
+		# SELECT with -As PS
 		$r = Invoke-LiteCommand 'SELECT $ FROM test' -As PS
 		$r | Out-String
 		equals $r.GetType().Name PSCustomObject
+		equals $r._id 1
+		equals $r.p 1
+
+		# SELECT with -As T1
+		class T1 {$id; $p}
+		$r = Invoke-LiteCommand 'SELECT $ FROM test' -As T1
+		$r | Out-String
+		equals $r.GetType().Name T1
+		equals $r.id 1
+		equals $r.p 1
 	}
 }
 

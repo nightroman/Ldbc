@@ -6,6 +6,19 @@
 Import-Module Ldbc
 Set-StrictMode -Version 2
 
+$AsParameter = @'
+Specifies the type of output objects. The argument is either a type or a type
+name or an alias ("PS", "Default"). "PS" is for PSCustomObject. "Default" is
+for Ldbc.Dictionary, the PowerShell friendly wrapper of BsonDocument.
+'@
+
+$AsOutputs = @(
+	@{
+		type = 'object, PSCustomObject, Ldbc.Dictionary'
+		description = 'Output types depend on the parameter As.'
+	}
+)
+
 $CollectionNameParameter = @'
 The collection name, case insensitive.
 '@
@@ -50,12 +63,6 @@ This way works faster and provides an automatic transaction for the bulk.
 But it may require more memory and get less output and error information.
 '@
 
-$AsParameter = @'
-Specifies the type of returned documents.
-By default, it is Ldbc.Dictionary, PowerShell friendly wrapper of BsonDocument.
-The only custom type for now is "PS", which stands for PowerShell custom object.
-'@
-
 ### Get-LiteData
 @{
 	command = 'Get-LiteData'
@@ -78,8 +85,7 @@ Non positive values are ignored.
 '@
 		Skip = @'
 Specifies the number of documents to skip from the beginning or from the end if
-Last is specified. Skipping is applied to results before taking First or Last.
-Non positive values are ignored.
+Last is specified. Non positive values are ignored.
 '@
 		Select = @'
 Specifies the projections that are applied to the results.
@@ -91,12 +97,7 @@ Specifies the sort expression.
 Specifies the sort direction, 1: ascending, -1: descending.
 '@
 	}
-	outputs = @(
-		@{
-			type = 'Ldbc.Dictionary'
-			description = 'PowerShell friendly wrapper of BsonDocument.'
-		}
-	)
+	outputs = $AsOutputs
 	examples = @(
 		@{
 			code = {
@@ -109,11 +110,17 @@ Specifies the sort direction, 1: ascending, -1: descending.
 
 					# query data using filter with parameters
 					Get-LiteData $test ('$.Name = @Name', @{Name = 'Mary'})
+
+					# query strongly typed data
+					class MyData {[int]$Id; [string]$Name}
+					Get-LiteData $test -As MyData
 				}
 			}
 			test = {
 				$r = . $args[0]
-				equals "$r" '{"_id":2,"Name":"Mary"}'
+				equals "$($r[0])" '{"_id":2,"Name":"Mary"}'
+				equals $r[1].Id 1
+				equals $r[1].Name John
 			}
 		}
 	)
@@ -385,12 +392,7 @@ supports parameters).
 		Quiet = 'Tells to omit the command output.'
 		Collection = 'The output [ref] of the command collection name.'
 	}
-	outputs = @(
-		@{
-			type = 'object, Ldbc.Dictionary'
-			description = 'The command result objects.'
-		}
-	)
+	outputs = $AsOutputs
 	examples = @(
 		@{
 			title = 'See README examples.'

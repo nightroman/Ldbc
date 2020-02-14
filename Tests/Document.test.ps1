@@ -42,3 +42,30 @@ task Json {
 	$r = [Ldbc.Dictionary]::FromJson($json3)
 	equals $r $d
 }
+
+task ToBsonDocument {
+	$d = [Ldbc.Dictionary]::new()
+	$d._id = 1
+
+	# explicit method
+	$b = $d.ToBsonDocument()
+	assert ([object]::ReferenceEquals($b, $d.ToBsonDocument()))
+
+	# implicit operator
+	$b = [LiteDB.BsonDocument]$d
+	assert ([object]::ReferenceEquals($b, $d.ToBsonDocument()))
+}
+
+task ToBsonArray {
+	$d = [Ldbc.Collection]::new()
+	equals $d.Add(1) $null
+	equals @($d.Add(1)).Count 0
+
+	# explicit method
+	$b = $d.ToBsonArray()
+	assert ([object]::ReferenceEquals($b, $d.ToBsonArray()))
+
+	# implicit operator
+	$b = [LiteDB.BsonArray]$d
+	assert ([object]::ReferenceEquals($b, $d.ToBsonArray()))
+}

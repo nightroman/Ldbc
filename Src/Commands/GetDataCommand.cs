@@ -46,7 +46,8 @@ namespace Ldbc.Commands
 		public int Skip { get; set; }
 
 		[Parameter(ParameterSetName = nsData)]
-		public object As { get; set; }
+		public object As { set { _As = new ParameterAs(value); } }
+		ParameterAs _As;
 
 		int GetCount()
 		{
@@ -106,22 +107,9 @@ namespace Ldbc.Commands
 			if (First > 0)
 				result = result.Limit(First);
 
-			// case: no As
-			if (As == null)
-			{
-				foreach (var doc in result.ToEnumerable())
-					WriteObject(Actor.ToObject(doc));
-				return;
-			}
-
-			if (As is string s && s.Equals("PS", StringComparison.OrdinalIgnoreCase))
-			{
-				foreach (var doc in result.ToEnumerable())
-					WriteObject(PSObjectSeializer.ReadCustomObject(doc));
-				return;
-			}
-
-			throw new PSNotSupportedException("Parameter As must be just 'PS', for now.");
+			var convert = ParameterAs.GetConvert(_As);
+			foreach (var doc in result.ToEnumerable())
+				WriteObject(convert(doc));
 		}
 	}
 }

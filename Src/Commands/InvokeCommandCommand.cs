@@ -25,7 +25,8 @@ namespace Ldbc.Commands
 		public SwitchParameter Quiet { get; set; }
 
 		[Parameter]
-		public object As { get; set; }
+		public object As { set { _As = new ParameterAs(value); } }
+		ParameterAs _As;
 
 		[Parameter]
 		public PSReference Collection { get; set; }
@@ -45,36 +46,22 @@ namespace Ldbc.Commands
 				if (Quiet)
 					return;
 
-				// case: no As
-				if (As == null)
+				var convert = ParameterAs.GetConvert(_As);
+				while (reader.Read())
 				{
-					while (reader.Read())
-						WriteObject(Actor.ToObject(reader.Current));
-					return;
-				}
-
-				if (As is string s && s.Equals("PS", StringComparison.OrdinalIgnoreCase))
-				{
-					while (reader.Read())
+					var value = reader.Current;
+					switch (value.Type)
 					{
-						var value = reader.Current;
-						switch (value.Type)
-						{
-							case BsonType.Document:
-								WriteObject(PSObjectSeializer.ReadCustomObject(value.AsDocument));
-								break;
-							case BsonType.Array:
-								WriteObject(PSObjectSeializer.ReadArray(value.AsArray));
-								break;
-							default:
-								WriteObject(Actor.ToObject(value));
-								break;
-						}
+						case BsonType.Document:
+							WriteObject(convert(value.AsDocument));
+							break;
+						case BsonType.Array:
+							throw new NotImplementedException("TODO BsonType.Array");
+						default:
+							WriteObject(Actor.ToObject(value));
+							break;
 					}
-					return;
 				}
-
-				throw new PSNotSupportedException("Parameter As must be just 'PS', for now.");
 			}
 		}
 	}

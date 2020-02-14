@@ -14,6 +14,10 @@ namespace Ldbc
 	public sealed class Dictionary : IDictionary<string, object>, IDictionary
 	{
 		readonly BsonDocument _document;
+		public static implicit operator BsonDocument(Dictionary value)
+		{
+			return value?._document;
+		}
 		public Dictionary()
 		{
 			_document = new BsonDocument();

@@ -120,10 +120,9 @@ namespace Ldbc
 				//return BsonExtensionMethods.ToBsonDocument(value, type);
 				throw new NotImplementedException();
 
-			// no converter? die //??
-			//if (convert == null)
-			//	//! use this type
-			//	throw new ArgumentException(Res.CannotConvert2(type, nameof(BsonValue)));
+			// no converter? //??
+			if (convert == null)
+				return BsonMapper.Global.Serialize(type, value);
 
 			try
 			{

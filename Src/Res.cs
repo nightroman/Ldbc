@@ -24,4 +24,10 @@ namespace Ldbc
 			return $"{CannotConvert2(from, to)} -- {error}";
 		}
 	}
+
+	public enum OutputType
+	{
+		Default,
+		PS
+	}
 }

@@ -1,5 +1,16 @@
 # Ldbc Release Notes
 
+## v0.5.0
+
+`Add-LiteData`, `Set-LiteData` serialize complex types using the default mapper.
+As a result, in particular, it is now possible to work with PowerShell classes.
+See examples in [Class.test.ps1](https://github.com/nightroman/Ldbc/blob/master/Tests/Class.test.ps1).
+
+Parameters `As` of `Get-LiteData` and `Invoke-LiteCommand` support all suitable
+types, including PowerShell classes. For now, the default global mapper is used.
+
+Added implicit converters to wrapped types to `Ldbc.Dictionary` and `Ldbc.Collection`.
+
 ## v0.4.2
 
 - `Get-LiteData` - new parameters `Select`, `OrderBy`, `Order`

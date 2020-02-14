@@ -12,10 +12,22 @@ Set-StrictMode -Version 2
 $ModuleName = 'Ldbc'
 $ModuleRoot = if ($env:ProgramW6432) {$env:ProgramW6432} else {$env:ProgramFiles}
 $ModuleRoot = "$ModuleRoot\WindowsPowerShell\Modules\$ModuleName"
+$Clean = $false
+
+Exit-Build {
+	if ($Clean) {
+		remove *.nupkg, z, Src\bin, Src\obj, README.htm
+	}
+}
 
 # Get version from release notes.
 function Get-Version {
 	switch -Regex -File Release-Notes.md {'##\s+v(\d+\.\d+\.\d+)' {return $Matches[1]} }
+}
+
+# Synopsis: Clean on exit.
+task Clean {
+	$script:Clean = $true
 }
 
 $MetaParam = @{
@@ -95,11 +107,6 @@ task CopyXml {
 		# when reference LiteDB.csproj
 		Write-Warning "Missing PackageReference LiteDB"
 	}
-}
-
-# Synopsis: Remove temp files.
-task Clean {
-	remove *.nupkg, z, Src\bin, Src\obj, README.htm
 }
 
 # Synopsis: Build help by Helps (https://github.com/nightroman/Helps).

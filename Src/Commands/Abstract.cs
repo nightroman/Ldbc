@@ -71,4 +71,61 @@ namespace Ldbc.Commands
 			return BsonExpression.Create(value);
 		}
 	}
+
+	/// <summary>
+	/// Common parameter -As.
+	/// </summary>
+	class ParameterAs
+	{
+		readonly Type Type;
+
+		public static Func<BsonDocument, object> GetConvert(ParameterAs value)
+		{
+			// default wrap by Dictionary
+			if (value == null || value.Type == typeof(Dictionary))
+				return x => new Dictionary(x);
+
+			// convert to PSObject
+			if (value.Type == typeof(PSObject))
+				return x => PSObjectSeializer.ReadCustomObject(x);
+
+			// return BsonDocument as is
+			if (value.Type == typeof(BsonDocument))
+				return x => x;
+
+			// deserialize
+			return x => BsonMapper.Global.Deserialize(value.Type, x);
+		}
+
+		public ParameterAs(object value)
+		{
+			value = Actor.BaseObject(value);
+			if (value == null)
+			{
+				Type = typeof(Dictionary);
+				return;
+			}
+
+			if (value is Type type)
+			{
+				Type = type;
+				return;
+			}
+
+			if (LanguagePrimitives.TryConvertTo(value, out OutputType alias))
+			{
+				switch (alias)
+				{
+					case OutputType.Default:
+						Type = typeof(Dictionary);
+						return;
+					case OutputType.PS:
+						Type = typeof(PSObject);
+						return;
+				}
+			}
+
+			Type = (Type)LanguagePrimitives.ConvertTo(value, typeof(Type), null);
+		}
+	}
 }

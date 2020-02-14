@@ -13,6 +13,10 @@ namespace Ldbc
 	public sealed class Collection : IList
 	{
 		readonly BsonArray _array;
+		public static implicit operator BsonArray(Collection value)
+		{
+			return value?._array;
+		}
 		public Collection()
 		{
 			_array = new BsonArray();

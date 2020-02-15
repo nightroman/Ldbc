@@ -66,9 +66,9 @@ namespace Ldbc
 		//! For external use only.
 		public static BsonValue ToBsonValue(object value)
 		{
-			return ToBsonValue(value, null, 0);
+			return ToBsonValue(value, 0);
 		}
-		static BsonValue ToBsonValue(object value, ScriptBlock convert, int depth)
+		static BsonValue ToBsonValue(object value, int depth)
 		{
 			IncSerializationDepth(ref depth);
 
@@ -79,7 +79,7 @@ namespace Ldbc
 
 			// case: custom
 			if (custom != null)
-				return ToBsonDocumentFromProperties(null, custom, convert, null, depth);
+				return ToBsonDocumentFromProperties(null, custom, null, depth);
 
 			// case: BsonValue
 			if (value is BsonValue bson)
@@ -96,7 +96,7 @@ namespace Ldbc
 
 			// case: dictionary
 			if (value is IDictionary dictionary)
-				return ToBsonDocumentFromDictionary(null, dictionary, convert, null, depth);
+				return ToBsonDocumentFromDictionary(null, dictionary, null, depth);
 
 			// case: bytes or collection
 			if (value is IEnumerable en)
@@ -106,39 +106,15 @@ namespace Ldbc
 
 				var array = new BsonArray();
 				foreach (var it in en)
-					array.Add(ToBsonValue(it, convert, depth));
+					array.Add(ToBsonValue(it, depth));
 				return array;
 			}
 
-			// try to map BsonValue //??
-			if (BsonTypeMapper.TryMapToBsonValue(value, out BsonValue bson2))
-				return bson2;
-
-			// try to serialize class //??
-			var type = value.GetType();
-			if (TypeIsDriverSerialized(type))
-				//return BsonExtensionMethods.ToBsonDocument(value, type);
-				throw new NotImplementedException();
-
-			// no converter? //??
-			if (convert == null)
-				return BsonMapper.Global.Serialize(type, value);
-
-			try
-			{
-				value = DocumentInput.ConvertValue(convert, value);
-			}
-			catch (RuntimeException re)
-			{
-				//! use this type
-				throw new ArgumentException($"Converter script was called for '{type}' and failed with '{re.Message}'.", re);
-			}
-
-			// do not pass converter twice
-			return ToBsonValue(value, null, depth);
+			// serialize value
+			return BsonMapper.Global.Serialize(value.GetType(), value);
 		}
 		//! IConvertibleToBsonDocument (e.g. Mdbc.Dictionary) must be converted before if source and properties are null
-		static BsonDocument ToBsonDocumentFromDictionary(BsonDocument source, IDictionary dictionary, ScriptBlock convert, IList<Selector> properties, int depth)
+		static BsonDocument ToBsonDocumentFromDictionary(BsonDocument source, IDictionary dictionary, IList<Selector> properties, int depth)
 		{
 			IncSerializationDepth(ref depth);
 
@@ -155,7 +131,7 @@ namespace Ldbc
 				foreach (DictionaryEntry de in dictionary)
 				{
 					if (de.Key is string name)
-						document.Add(name, ToBsonValue(de.Value, convert, depth));
+						document.Add(name, ToBsonValue(de.Value, depth));
 					else
 						throw new InvalidOperationException("Dictionary keys must be strings.");
 				}
@@ -167,25 +143,19 @@ namespace Ldbc
 					if (selector.PropertyName != null)
 					{
 						if (dictionary.Contains(selector.PropertyName))
-							document.Add(selector.DocumentName, ToBsonValue(dictionary[selector.PropertyName], convert, depth));
+							document.Add(selector.DocumentName, ToBsonValue(dictionary[selector.PropertyName], depth));
 					}
 					else
 					{
-						document.Add(selector.DocumentName, ToBsonValue(selector.GetValue(dictionary), convert, depth));
+						document.Add(selector.DocumentName, ToBsonValue(selector.GetValue(dictionary), depth));
 					}
 				}
 			}
 
 			return document;
 		}
-		internal static bool TypeIsDriverSerialized(Type type)
-		{
-			//return ClassMap.Contains(type); //??
-			System.Diagnostics.Debug.WriteLine(type);
-			return false;
-		}
 		// Input supposed to be not null
-		static BsonDocument ToBsonDocumentFromProperties(BsonDocument source, PSObject value, ScriptBlock convert, IList<Selector> properties, int depth)
+		static BsonDocument ToBsonDocumentFromProperties(BsonDocument source, PSObject value, IList<Selector> properties, int depth)
 		{
 			IncSerializationDepth(ref depth);
 
@@ -197,21 +167,11 @@ namespace Ldbc
 			if (properties == null || properties.Count == 0)
 			{
 				// if properties omitted (null) and the top (1) native object is not custom
-				if (properties == null && depth == 1 && (!(value.BaseObject is PSCustomObject)) && TypeIsDriverSerialized(type))
+				if (properties == null && depth == 1 && (!(value.BaseObject is PSCustomObject)))
 				{
 					try
 					{
-						throw new NotImplementedException();
-						//// serialize the top level native object //??
-						//var document = BsonExtensionMethods.ToBsonDocument(value.BaseObject, type);
-
-						//// return the result
-						//if (source == null)
-						//	return document;
-
-						//// add to the provided document
-						//source.AddRange(document.Elements);
-						//return source;
+						return BsonMapper.Global.Serialize(type, value.BaseObject).AsDocument;
 					}
 					catch (SystemException exn)
 					{
@@ -226,7 +186,7 @@ namespace Ldbc
 					{
 						try
 						{
-							document.Add(pi.Name, ToBsonValue(pi.Value, convert, depth));
+							document.Add(pi.Name, ToBsonValue(pi.Value, depth));
 						}
 						catch (GetValueException) // .Value may throw, e.g. ExitCode in Process
 						{
@@ -256,7 +216,7 @@ namespace Ldbc
 						{
 							try
 							{
-								document.Add(selector.DocumentName, ToBsonValue(pi.Value, convert, depth));
+								document.Add(selector.DocumentName, ToBsonValue(pi.Value, depth));
 							}
 							catch (GetValueException) // .Value may throw, e.g. ExitCode in Process
 							{
@@ -266,7 +226,7 @@ namespace Ldbc
 					}
 					else
 					{
-						document.Add(selector.DocumentName, ToBsonValue(selector.GetValue(value), convert, depth));
+						document.Add(selector.DocumentName, ToBsonValue(selector.GetValue(value), depth));
 					}
 				}
 				return document;
@@ -275,17 +235,17 @@ namespace Ldbc
 		//! For external use only.
 		public static BsonDocument ToBsonDocument(object value)
 		{
-			return ToBsonDocument(null, value, null, null, 0);
+			return ToBsonDocument(null, value, null, 0);
 		}
 		//! For external use only.
-		public static BsonDocument ToBsonDocument(BsonDocument source, object value, ScriptBlock convert, IList<Selector> properties)
+		public static BsonDocument ToBsonDocument(BsonDocument source, object value, IList<Selector> properties)
 		{
-			return ToBsonDocument(source, value, convert, properties, 0);
+			return ToBsonDocument(source, value, properties, 0);
 		}
 		//! For external use only.
 		internal static BsonDocument ToBsonDocumentFromDictionary(IDictionary value)
 		{
-			return ToBsonDocumentFromDictionary(null, value, null, null, 0);
+			return ToBsonDocumentFromDictionary(null, value, null, 0);
 		}
 		static BsonDocument TryBsonDocument(object value)
 		{
@@ -297,7 +257,7 @@ namespace Ldbc
 
 			return null;
 		}
-		static BsonDocument ToBsonDocument(BsonDocument source, object value, ScriptBlock convert, IList<Selector> properties, int depth)
+		static BsonDocument ToBsonDocument(BsonDocument source, object value, IList<Selector> properties, int depth)
 		{
 			value = BaseObject(value, out PSObject custom);
 
@@ -310,13 +270,13 @@ namespace Ldbc
 					return document;
 
 				// wrap, we need IDictionary, BsonDocument is not
-				return ToBsonDocumentFromDictionary(source, new Dictionary(document), convert, properties, depth);
+				return ToBsonDocumentFromDictionary(source, new Dictionary(document), properties, depth);
 			}
 
 			if (value is IDictionary dictionary)
-				return ToBsonDocumentFromDictionary(source, dictionary, convert, properties, depth);
+				return ToBsonDocumentFromDictionary(source, dictionary, properties, depth);
 
-			return ToBsonDocumentFromProperties(source, custom ?? new PSObject(value), convert, properties, depth);
+			return ToBsonDocumentFromProperties(source, custom ?? new PSObject(value), properties, depth);
 		}
 		static void IncSerializationDepth(ref int depth)
 		{

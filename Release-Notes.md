@@ -1,5 +1,15 @@
 # Ldbc Release Notes
 
+## v0.6.0
+
+New cmdlet `Register-LiteType` for PowerShell friendly custom serialization.
+
+Renamed parameters `Filter` to `Where` (~ LiteDB and PowerShell style).
+
+Simplified internal data conversion to documents.
+
+Work around [#1483](https://github.com/mbdavid/LiteDB/issues/1483).
+
 ## v0.5.0
 
 `Add-LiteData`, `Set-LiteData` serialize complex types using the default mapper.

@@ -19,6 +19,12 @@ $AsOutputs = @(
 	}
 )
 
+$BulkParameter = @'
+Tells to collect documents from the pipeline and invoke bulk processing.
+This way works faster and provides an automatic transaction for the bulk.
+But it may require more memory and get less output and error information.
+'@
+
 $CollectionNameParameter = @'
 The collection name, case insensitive.
 '@
@@ -41,11 +47,6 @@ A string expression with parameters is followed by a dictionary with parameter v
 	'.. @age .. @income ..', @{age = 40; income = 80}
 '@
 
-$FilterParameter = $(
-	'Specifies the filter expression.'
-	$ExpressionHelp
-)
-
 $ParametersParameter = @'
 Specifies the expression named parameters (IDictionary) or indexed arguments (IList or object).
 '@
@@ -57,11 +58,10 @@ $DocumentInputs = @(
 	}
 )
 
-$BulkParameter = @'
-Tells to collect documents from the pipeline and invoke bulk processing.
-This way works faster and provides an automatic transaction for the bulk.
-But it may require more memory and get less output and error information.
-'@
+$WhereParameter = $(
+	'Specifies the filter expression.'
+	$ExpressionHelp
+)
 
 ### Get-LiteData
 @{
@@ -72,7 +72,7 @@ The cmdlets gets data specified by the parameters from the collection.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
-		Filter = $FilterParameter
+		Where = $WhereParameter
 		As = $AsParameter
 		Count = 'Tells to count the documents and return the number.'
 		First = @'
@@ -271,7 +271,7 @@ This method does not deserialize any document.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
-		Filter = $FilterParameter
+		Where = $WhereParameter
 	}
 	outputs = @(
 		@{
@@ -290,7 +290,7 @@ The cmdlet removes documents specified by the filter from the collection.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
-		Filter = $FilterParameter
+		Where = $WhereParameter
 		Result = 'Tells to output the number of removed documents.'
 	}
 	examples = @(
@@ -332,7 +332,7 @@ update expression.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
-		Filter = $FilterParameter
+		Where = $WhereParameter
 		Update = $(
 			'Specifies the transformation expression.'
 			$ExpressionHelp
@@ -570,5 +570,46 @@ default database.
 	links = @(
 		@{ text = 'New-LiteDatabase' }
 		@{ text = 'Use-LiteDatabase' }
+	)
+}
+
+### Register-LiteType
+@{
+	command = 'Register-LiteType'
+	synopsis = 'Registers custom type serialization.'
+	description = @'
+The cmdlet allows custom serialization definition using script blocks.
+'@
+	parameters = @{
+		Type = @'
+Specifies the custom serialized type.
+'@
+		Serialize = @'
+The script which converts the live object $_ to the object to be serialized.
+'@
+		Deserialize = @'
+The script which converts the deserialized object $_ to the live object.
+'@
+	}
+	examples = @(
+		@{
+			code = {
+				# save Version as string
+				Register-LiteType ([Version]) {
+					$_.ToString()
+				} {
+					[version]$_
+				}
+
+				# test
+				$data1 = [version]'1.2.3'
+				$saved = [LiteDB.BsonMapper]::Global.Serialize([version], $data1)
+				$data2 = [LiteDB.BsonMapper]::Global.Deserialize([version], $saved)
+				$data2 -eq $data1
+			}
+			test = {
+				assert (. $args[0])
+			}
+		}
 	)
 }

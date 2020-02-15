@@ -19,8 +19,8 @@ namespace Ldbc.Commands
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1)]
-		public object Filter { set { _Filter = Expression.Create(value); } }
-		Expression _Filter;
+		public object Where { set { _Where = Expression.Create(value); } }
+		Expression _Where;
 
 		[Parameter(ParameterSetName = nsData)]
 		public object Select { set { _Select = Expression.Create(value); } }
@@ -51,7 +51,7 @@ namespace Ldbc.Commands
 
 		int GetCount()
 		{
-			return _Filter == null ? Collection.Count() : Collection.Count(_Filter.BsonExpression);
+			return _Where == null ? Collection.Count() : Collection.Count(_Where.BsonExpression);
 		}
 
 		bool DoLast()
@@ -89,8 +89,8 @@ namespace Ldbc.Commands
 			var query = Collection.Query();
 
 			// Filter
-			if (_Filter != null)
-				query = query.Where(_Filter.BsonExpression);
+			if (_Where != null)
+				query = query.Where(_Where.BsonExpression);
 
 			// OrderBy
 			if (_OrderBy != null)

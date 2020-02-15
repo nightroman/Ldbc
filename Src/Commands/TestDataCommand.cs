@@ -15,12 +15,12 @@ namespace Ldbc.Commands
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1)]
-		public object Filter { set { _Filter = Expression.Create(value); } }
-		Expression _Filter;
+		public object Where { set { _Where = Expression.Create(value); } }
+		Expression _Where;
 
 		protected override void BeginProcessing()
 		{
-			var yes = Collection.Exists(_Filter.BsonExpression);
+			var yes = Collection.Exists(_Where.BsonExpression);
 			WriteObject(yes);
 		}
 	}

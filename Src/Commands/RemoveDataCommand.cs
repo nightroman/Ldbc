@@ -14,15 +14,15 @@ namespace Ldbc.Commands
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1, Mandatory = true)]
-		public object Filter { set { _Filter = Expression.Create(value); } }
-		Expression _Filter;
+		public object Where { set { _Where = Expression.Create(value); } }
+		Expression _Where;
 
 		[Parameter]
 		public SwitchParameter Result { get; set; }
 
 		protected override void BeginProcessing()
 		{
-			var count = Collection.DeleteMany(_Filter.BsonExpression);
+			var count = Collection.DeleteMany(_Where.BsonExpression);
 			if (Result)
 				WriteObject(count);
 		}

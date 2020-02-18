@@ -1,5 +1,9 @@
 # Ldbc Release Notes
 
+## v0.6.1
+
+`Get-LiteData`, `Remove-LiteData` - new parameter `ById`.
+
 ## v0.6.0
 
 New cmdlet `Register-LiteType` for PowerShell friendly custom serialization.

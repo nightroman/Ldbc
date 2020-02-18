@@ -13,14 +13,19 @@ namespace Ldbc.Commands
 	public sealed class GetDataCommand : Abstract
 	{
 		const string nsData = "Data";
+		const string nsById= "ById";
 		const string nsCount = "Count";
 
 		[Parameter(Position = 0, Mandatory = true)]
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
-		[Parameter(Position = 1)]
+		[Parameter(Position = 1, ParameterSetName = nsData)]
+		[Parameter(Position = 1, ParameterSetName = nsCount)]
 		public object Where { set { _Where = Expression.Create(value); } }
 		Expression _Where;
+
+		[Parameter(ParameterSetName = nsById, Mandatory = true)]
+		public object ById { get; set; }
 
 		[Parameter(ParameterSetName = nsData)]
 		public object Select { set { _Select = Expression.Create(value); } }
@@ -46,6 +51,7 @@ namespace Ldbc.Commands
 		public int Skip { get; set; }
 
 		[Parameter(ParameterSetName = nsData)]
+		[Parameter(ParameterSetName = nsById)]
 		public object As { set { _As = new ParameterAs(value); } }
 		ParameterAs _As;
 
@@ -72,17 +78,36 @@ namespace Ldbc.Commands
 			return false;
 		}
 
+		void DoById()
+		{
+			var doc = Collection.FindById(Actor.ToBsonValue(ById));
+			if (doc != null)
+			{
+				var convert = ParameterAs.GetConvert(_As);
+				WriteObject(convert(doc));
+			}
+		}
+
 		protected override void BeginProcessing()
 		{
+			// case: ById
+			if (ById != null)
+			{
+				DoById();
+				return;
+			}
+
 			if (First > 0 && Last > 0)
 				throw new PSArgumentException("Parameters First and Last cannot be specified together.");
 
+			// case: Count
 			if (Count)
 			{
 				WriteObject(GetCount());
 				return;
 			}
 
+			// case? Last
 			if (DoLast())
 				return;
 

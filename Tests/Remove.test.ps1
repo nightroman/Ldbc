@@ -44,3 +44,29 @@ task DELETE_WithParameters {
 		equals $test.Count() 0
 	}
 }
+
+task ById {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test
+
+		@{_id=1; p=1}, @{_id=2; p=2} | Add-LiteData $test
+
+		# missing, no -Result
+		$r = Remove-LiteData $test -ById 0
+		equals $r $null
+		equals $test.Count() 2
+
+		# missing, -Result
+		$r = Remove-LiteData $test -ById 0 -Result
+		equals $r 0
+		equals $test.Count() 2
+
+		# existing, -Result
+		$r = Remove-LiteData $test -ById 1 -Result
+		equals $r 1
+		equals $test.Count() 1
+
+		$r = Get-LiteData $test
+		equals "$r" '{"_id":2,"p":2}'
+	}
+}

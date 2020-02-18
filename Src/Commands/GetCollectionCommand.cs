@@ -15,7 +15,8 @@ namespace Ldbc.Commands
 		public string CollectionName { get; set; }
 
 		[Parameter(Position = 1)]
-		public BsonAutoId AutoId { get { return _AutoId; } set { _AutoId = value; } }
+		public BsonAutoId AutoId { set { _AutoId = value; } }
+		//! ensure default is ObjectId
 		BsonAutoId _AutoId = BsonAutoId.ObjectId;
 
 		[Parameter]

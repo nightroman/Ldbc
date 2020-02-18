@@ -74,7 +74,13 @@ The cmdlets gets data specified by the parameters from the collection.
 		Collection = $CollectionParameter
 		Where = $WhereParameter
 		As = $AsParameter
-		Count = 'Tells to count the documents and return the number.'
+		ById = @'
+Tells to find a document by the specified id.
+The cmdlet outputs the found document, if any.
+'@
+		Count = @'
+Tells to count the documents and return the number.
+'@
 		First = @'
 Specifies the number of first documents to be returned.
 Non positive values are ignored.
@@ -291,7 +297,12 @@ The cmdlet removes documents specified by the filter from the collection.
 	parameters = @{
 		Collection = $CollectionParameter
 		Where = $WhereParameter
-		Result = 'Tells to output the number of removed documents.'
+		ById = @'
+Tells to remove one document by the specified id.
+'@
+		Result = @'
+Tells to output the number of removed documents.
+'@
 	}
 	examples = @(
 		@{

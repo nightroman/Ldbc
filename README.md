@@ -48,11 +48,11 @@ Use-LiteDatabase :memory: {
     @{Name = 'John'}, @{Name = 'Mary'} | Add-LiteData $test
 
     # find using filter with parameters
-    $r = Get-LiteData $test '$.Name = @Name', @{Name = 'John'}
+    $r = Get-LiteData $test -Where '$.Name = @Name', @{Name = 'John'}
     "$r" # {"_id":1,"Name":"John"}
 
-    # remove using filter with parameters
-    Remove-LiteData $test '$._id = @_id', @{_id = 1}
+    # remove one by _id
+    Remove-LiteData $test -ById 1
 
     # get all documents
     $r = Get-LiteData $test

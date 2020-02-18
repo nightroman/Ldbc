@@ -166,3 +166,25 @@ task OrderBy {
 		equals "$r" '{"p":3} {"p":2} {"p":1}'
 	}
 }
+
+task ById {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test
+
+		@{_id=1; p=1}, @{_id=2; p=2} | Add-LiteData $test
+
+		# missing
+		$r = Get-LiteData $test -ById 0
+		equals $r $null
+
+		# existing
+		$r = Get-LiteData $test -ById 1
+		equals "$r" '{"_id":1,"p":1}'
+
+		# existing -As
+		$r = Get-LiteData $test -ById 2 -As PS
+		equals $r.GetType().Name PSCustomObject
+		equals $r._id 2
+		equals $r.p 2
+	}
+}

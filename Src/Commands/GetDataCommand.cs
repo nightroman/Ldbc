@@ -28,8 +28,14 @@ namespace Ldbc.Commands
 		public object ById { get; set; }
 
 		[Parameter(ParameterSetName = nsData)]
+		[Parameter(ParameterSetName = nsById)]
 		public object Select { set { _Select = Expression.Create(value); } }
 		Expression _Select;
+
+		[Parameter(ParameterSetName = nsData)]
+		[Parameter(ParameterSetName = nsById)]
+		public string[] Include { set { _Include = value; } }
+		string[] _Include;
 
 		[Parameter(ParameterSetName = nsData)]
 		public object OrderBy { set { _OrderBy = Expression.Create(value); } }
@@ -90,11 +96,18 @@ namespace Ldbc.Commands
 
 		protected override void BeginProcessing()
 		{
-			// case: ById
+			// ById?
 			if (ById != null)
 			{
-				DoById();
-				return;
+				// case: ById
+				if (_Select == null)
+				{
+					DoById();
+					return;
+				}
+
+				// make Where by id
+				_Where = new Expression(BsonExpression.Create("$._id = @0", Actor.ToBsonValue(ById)));
 			}
 
 			if (First > 0 && Last > 0)
@@ -120,6 +133,13 @@ namespace Ldbc.Commands
 			// OrderBy
 			if (_OrderBy != null)
 				query = query.OrderBy(_OrderBy.BsonExpression, Order < 0 ? -1 : 1);
+
+			// Include
+			if (_Include != null)
+			{
+				foreach (var it in _Include)
+					query = query.Include(BsonExpression.Create(it));
+			}
 
 			// Select and Skip
 			ILiteQueryableResult<BsonDocument> result;

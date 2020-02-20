@@ -20,7 +20,7 @@ LONG DESCRIPTION
             Invokes the LiteDB SQL command and gets results
 
         Get-LiteCollection
-            Gets the collection instance
+            Gets the collection with optional auto id
 
         Add-LiteData
         Get-LiteData
@@ -30,5 +30,40 @@ LONG DESCRIPTION
         Update-LiteData
             Operate on documents in the collection
 
+        Register-LiteType
+            Registers types with custom serialization.
+
+HELPERS
+        [Ldbc.Dictionary]
+            PowerShell friendly wrapper of [LiteDB.BsonDocument].
+            It is used as the default type of output documents.
+            It is effective as input, too, avoiding conversions.
+
+            Features:
+            - dot-notation for getting and setting values
+            - usual IDictionary properties and methods
+            - Print() - gets indented formatted JSON
+            - FromJson() - creates data from JSON
+            - EnsureId() - generates ObjectId
+            - ToBsonDocument() - gets the wrapped document
+            - ditto by implicit conversion to BsonDocument
+
+        [Ldbc.Collection]
+            PowerShell friendly wrapper of [LiteDB.BsonArray].
+            It is mostly used for arrays in output documents.
+            Normally you do not have to create it directly.
+
+            Features:
+            - usual IList properties and methods
+            - ToBsonArray() - gets the wrapped array
+            - ditto by implicit conversion to BsonArray
+
+        [Ldbc.Expression]
+            PowerShell friendly wrapper of [LiteDB.BsonExpression].
+
+            Features:
+            - Parameters, wrapped by [Ldbc.Dictionary] for dot-notation
+
 SEE ALSO
+    Ldbc https://github.com/nightroman/Ldbc
     LiteDB https://www.litedb.org

@@ -124,13 +124,12 @@ should be used directly. Ldbc is the helper, not replacement.
 | Upsert | Set-LiteData -Add | none, count
 | UpdateMany | Update-LiteData | none, count
 | DeleteMany | Remove-LiteData | none, count
+| **Misc** | |
+| RegisterType | Register-LiteType | none
 
 ## Work in progress
 
 Work on module commands and features is in progress, they may change before v1.0.0
-
-Ldbc is going to be aligned with [Mdbc](https://github.com/nightroman/Mdbc).
-You may look at it as some sort of the roadmap.
 
 ## See also
 

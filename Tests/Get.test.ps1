@@ -188,3 +188,19 @@ task ById {
 		equals $r.p 2
 	}
 }
+
+task ByIdWithSelect {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test
+
+		Add-LiteData $test @{_id=98; p1=23; p2=84}
+
+		# missing
+		$r = Get-LiteData $test -ById 1 -Select '{r:p1}'
+		equals $r $null
+
+		# existing
+		$r = Get-LiteData $test -ById 98 -Select '{r:p1}'
+		equals "$r" '{"r":23}'
+	}
+}

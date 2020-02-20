@@ -12,22 +12,15 @@ Set-StrictMode -Version 2
 $ModuleName = 'Ldbc'
 $ModuleRoot = if ($env:ProgramW6432) {$env:ProgramW6432} else {$env:ProgramFiles}
 $ModuleRoot = "$ModuleRoot\WindowsPowerShell\Modules\$ModuleName"
-$Clean = $false
-
-Exit-Build {
-	if ($Clean) {
-		remove *.nupkg, z, Src\bin, Src\obj, README.htm
-	}
-}
 
 # Get version from release notes.
 function Get-Version {
 	switch -Regex -File Release-Notes.md {'##\s+v(\d+\.\d+\.\d+)' {return $Matches[1]} }
 }
 
-# Synopsis: Clean on exit.
+# Synopsis: Clean the workspace.
 task Clean {
-	$script:Clean = $true
+	remove *.nupkg, z, Src\bin, Src\obj, README.htm
 }
 
 $MetaParam = @{
@@ -159,7 +152,7 @@ task Version {
 }
 
 # Synopsis: Make the package in z\tools.
-task Package Full, Markdown, {
+task Package Build, Help, TestHelp, Test, Test6, Markdown, {
 	remove z
 	$null = mkdir z\tools\$ModuleName
 
@@ -178,9 +171,4 @@ task PushPSGallery Package, Version, {
 Clean
 
 # Synopsis: Fast dev round.
-task Fast Build, Help, Test, Clean
-
-# Synopsis: Full dev round.
-task Full Build, Help, TestHelp, Test, Test6, Clean
-
-task . Fast
+task . Build, Help, Test, Clean

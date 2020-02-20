@@ -1,5 +1,12 @@
 # Ldbc Release Notes
 
+## v0.6.2
+
+`Get-LiteData`
+
+- New parameter `Include` for references.
+- Parameter set `ById` includes `Select`.
+
 ## v0.6.1
 
 `Get-LiteData`, `Remove-LiteData` - new parameter `ById`.

@@ -93,14 +93,27 @@ Non positive values are ignored.
 Specifies the number of documents to skip from the beginning or from the end if
 Last is specified. Non positive values are ignored.
 '@
-		Select = @'
-Specifies the projections that are applied to the results.
-'@
 		OrderBy = @'
 Specifies the sort expression.
 '@
 		Order = @'
 Specifies the sort direction, 1: ascending, -1: descending.
+'@
+		Select = @'
+Specifies the projections applied to results.
+Note that _id is not automatically included.
+
+Examples:
+	Selected field subset: {_id, name, age}
+	Renamed or calculated: {Item: name, Total: $.count * $.price}
+'@
+		Include = @'
+Specifies expressions for loading references.
+
+Example: Given $order is the collection of [Order] with references to single
+[Customer] and multiple [Product]
+
+	Get-LiteData $orders -As Order -Include '$.Customer', '$.Products[*]'
 '@
 	}
 	outputs = $AsOutputs

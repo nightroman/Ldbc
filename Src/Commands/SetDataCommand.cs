@@ -51,7 +51,7 @@ namespace Ldbc.Commands
 			{
 				if (Add)
 				{
-					if (Collection.Upsert(Actor.ToBsonDocument(InputObject)))
+					if (Collection.Upsert(Actor.ToBsonDocumentNoDefaultId(InputObject)))
 						++_count;
 				}
 				else

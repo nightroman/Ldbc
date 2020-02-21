@@ -3,7 +3,6 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 
 using LiteDB;
-using System;
 using System.Management.Automation;
 
 namespace Ldbc.Commands
@@ -21,16 +20,16 @@ namespace Ldbc.Commands
 
 		[Parameter(Position = 1, ParameterSetName = nsData)]
 		[Parameter(Position = 1, ParameterSetName = nsCount)]
-		public object Where { set { _Where = Expression.Create(value); } }
-		Expression _Where;
+		public object Where { set { _Where = Expression.Input(value); } }
+		BsonExpression _Where;
 
 		[Parameter(ParameterSetName = nsById, Mandatory = true)]
 		public object ById { get; set; }
 
 		[Parameter(ParameterSetName = nsData)]
 		[Parameter(ParameterSetName = nsById)]
-		public object Select { set { _Select = Expression.Create(value); } }
-		Expression _Select;
+		public object Select { set { _Select = Expression.Input(value); } }
+		BsonExpression _Select;
 
 		[Parameter(ParameterSetName = nsData)]
 		[Parameter(ParameterSetName = nsById)]
@@ -38,8 +37,8 @@ namespace Ldbc.Commands
 		string[] _Include;
 
 		[Parameter(ParameterSetName = nsData)]
-		public object OrderBy { set { _OrderBy = Expression.Create(value); } }
-		Expression _OrderBy;
+		public object OrderBy { set { _OrderBy = Expression.Input(value); } }
+		BsonExpression _OrderBy;
 
 		[Parameter(ParameterSetName = nsData)]
 		public int Order { get; set; }
@@ -63,7 +62,7 @@ namespace Ldbc.Commands
 
 		int GetCount()
 		{
-			return _Where == null ? Collection.Count() : Collection.Count(_Where.BsonExpression);
+			return _Where == null ? Collection.Count() : Collection.Count(_Where);
 		}
 
 		bool DoLast()
@@ -106,33 +105,36 @@ namespace Ldbc.Commands
 					return;
 				}
 
-				// make Where by id
-				_Where = new Expression(BsonExpression.Create("$._id = @0", Actor.ToBsonValue(ById)));
+				// make Where by id and take 1
+				_Where = WhereIdExpression.Input(ById);
+				First = 1;
 			}
-
-			if (First > 0 && Last > 0)
-				throw new PSArgumentException("Parameters First and Last cannot be specified together.");
-
-			// case: Count
-			if (Count)
+			else
 			{
-				WriteObject(GetCount());
-				return;
-			}
+				if (First > 0 && Last > 0)
+					throw new PSArgumentException("Parameters First and Last cannot be specified together.");
 
-			// case? Last
-			if (DoLast())
-				return;
+				// case: Count
+				if (Count)
+				{
+					WriteObject(GetCount());
+					return;
+				}
+
+				// case? Last
+				if (DoLast())
+					return;
+			}
 
 			var query = Collection.Query();
 
 			// Filter
 			if (_Where != null)
-				query = query.Where(_Where.BsonExpression);
+				query = query.Where(_Where);
 
 			// OrderBy
 			if (_OrderBy != null)
-				query = query.OrderBy(_OrderBy.BsonExpression, Order < 0 ? -1 : 1);
+				query = query.OrderBy(_OrderBy, Order < 0 ? -1 : 1);
 
 			// Include
 			if (_Include != null)
@@ -144,7 +146,7 @@ namespace Ldbc.Commands
 			// Select and Skip
 			ILiteQueryableResult<BsonDocument> result;
 			if (_Select != null)
-				result = query.Select(_Select.BsonExpression).Skip(Skip);
+				result = query.Select(_Select).Skip(Skip);
 			else
 				result = query.Skip(Skip);
 

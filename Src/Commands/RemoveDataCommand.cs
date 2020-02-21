@@ -17,8 +17,8 @@ namespace Ldbc.Commands
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1, Mandatory = true, ParameterSetName = nsMany)]
-		public object Where { set { _Where = Expression.Create(value); } }
-		Expression _Where;
+		public object Where { set { _Where = Expression.Input(value); } }
+		BsonExpression _Where;
 
 		[Parameter(Mandatory = true, ParameterSetName = nsById)]
 		public object ById { get; set; }
@@ -30,7 +30,7 @@ namespace Ldbc.Commands
 		{
 			if (ById == null)
 			{
-				var count = Collection.DeleteMany(_Where.BsonExpression);
+				var count = Collection.DeleteMany(_Where);
 				if (Result)
 					WriteObject(count);
 			}

@@ -288,5 +288,27 @@ namespace Ldbc
 			var vars = new List<PSVariable>() { new PSVariable("_", value) };
 			return script.InvokeWithContext(null, vars);
 		}
+		//_200223_064239
+		public static void RemoveDefaultId(BsonDocument doc)
+		{
+			if (doc.TryGetValue("_id", out var id))
+			{
+				if (id.IsNull
+					|| id.IsInt32 && id.AsInt32 == 0
+					|| id.IsObjectId && id.AsObjectId == ObjectId.Empty
+					|| id.IsGuid && id.AsGuid == Guid.Empty
+					|| id.IsInt64 && id.AsInt64 == 0L)
+				{
+					doc.Remove("_id");
+				}
+			}
+		}
+		//_200223_064239
+		public static BsonDocument ToBsonDocumentNoDefaultId(object value)
+		{
+			var doc = ToBsonDocument(value);
+			RemoveDefaultId(doc);
+			return doc;
+		}
 	}
 }

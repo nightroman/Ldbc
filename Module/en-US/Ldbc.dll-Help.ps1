@@ -291,6 +291,7 @@ This method does not deserialize any document.
 	parameters = @{
 		Collection = $CollectionParameter
 		Where = $WhereParameter
+		ById = 'Specifies the document id.'
 	}
 	outputs = @(
 		@{

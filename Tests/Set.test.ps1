@@ -51,3 +51,33 @@ task UpdateInMissingCollection {
 		equals $r 0
 	}
 }
+
+#! https://github.com/mbdavid/LiteDB/issues/1483
+# .Upsert has issue.
+task UpsertId0 {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test Int32
+		$d = [LiteDB.BsonDocument]::new()
+		$d["_id"] = 0
+		$r = $test.Upsert($d)
+		equals $r $true
+		$r = Get-LiteData $test
+		equals "$r" '{"_id":0}'
+	}
+}
+
+#_200223_064239
+task AddDefaultId {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test Int32
+
+		Set-LiteData $test -Add @{_id = $null}
+		Set-LiteData $test -Add @{_id = 0}
+		Set-LiteData $test -Add @{_id = [LiteDB.ObjectId]::Empty}
+		Set-LiteData $test -Add @{_id = [guid]::Empty}
+		Set-LiteData $test -Add @{_id = 0L}
+
+		$r = Get-LiteData $test
+		equals "$r" '{"_id":1} {"_id":2} {"_id":3} {"_id":4} {"_id":5}'
+	}
+}

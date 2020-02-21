@@ -4,7 +4,8 @@ LiteDB Cmdlets for PowerShell
 
 ***
 
-Ldbc is the PowerShell module based on [LiteDB](https://www.litedb.org).
+Ldbc is the PowerShell module based on [LiteDB](https://www.litedb.org),
+a small, fast and lightweight .NET NoSQL embedded database.
 Ldbc makes LiteDB data and operations PowerShell friendly.
 
 The module works with Windows PowerShell v3-v5 .NET Framework 4.5 and PowerShell Core.
@@ -47,8 +48,8 @@ Use-LiteDatabase :memory: {
     # add two documents
     @{Name = 'John'}, @{Name = 'Mary'} | Add-LiteData $test
 
-    # find using filter with parameters
-    $r = Get-LiteData $test -Where '$.Name = @Name', @{Name = 'John'}
+    # find using filter with an argument
+    $r = Get-LiteData $test -Where '$.Name = @0', John
     "$r" # {"_id":1,"Name":"John"}
 
     # remove one by _id
@@ -118,7 +119,7 @@ should be used directly. Ldbc is the helper, not replacement.
 | **Collection** | |
 | Count | Get-LiteData -Count | count
 | Exists | Test-LiteData | true or false
-| Find | Get-LiteData | documents
+| Find* | Get-LiteData | documents
 | Insert | Add-LiteData | none, id, count
 | Update | Set-LiteData | none, count
 | Upsert | Set-LiteData -Add | none, count

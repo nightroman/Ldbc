@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using System.Reflection;
 
 namespace Ldbc.Commands
 {
@@ -27,14 +26,10 @@ namespace Ldbc.Commands
 		public SwitchParameter Bulk { get; set; }
 		List<object> _bulk;
 
-		static MethodInfo _RemoveDocId; //rk work around
-
 		protected override void BeginProcessing()
 		{
 			if (Bulk)
 				_bulk = new List<object>();
-			else
-				_RemoveDocId = typeof(LiteCollection<BsonDocument>).GetMethod("RemoveDocId", BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(BsonDocument) }, null);
 		}
 
 		protected override void ProcessRecord()
@@ -51,8 +46,7 @@ namespace Ldbc.Commands
 			try
 			{
 				var document = Actor.ToBsonDocument(InputObject);
-				//rk work around
-				_RemoveDocId.Invoke(Collection, new object[] { document });
+				Actor.RemoveDefaultId(document);
 				var id = Collection.Insert(document);
 				if (Result)
 					WriteObject(Actor.ToObject(id));
@@ -72,7 +66,7 @@ namespace Ldbc.Commands
 			if (!Bulk)
 				return;
 
-			var count = Collection.Insert(_bulk.Select(Actor.ToBsonDocument));
+			var count = Collection.Insert(_bulk.Select(Actor.ToBsonDocumentNoDefaultId));
 			if (Result)
 				WriteObject(count);
 		}

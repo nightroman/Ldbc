@@ -69,3 +69,35 @@ task AddWithError {
 		equals $r2 3
 	}
 }
+
+#! https://github.com/mbdavid/LiteDB/issues/1483
+# .Insert has issue.
+task InsertId0 {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test Int32
+		$d = [LiteDB.BsonDocument]::new()
+		$d["_id"] = 0
+		$r = $test.Insert($d)
+		equals $r.AsInt32 0
+		$r = Get-LiteData $test
+		equals "$r" '{"_id":0}'
+	}
+}
+
+#_200223_064239
+task AddDefaultId {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test Int32
+
+		$(
+			@{_id = $null}
+			@{_id = 0}
+			@{_id = [LiteDB.ObjectId]::Empty}
+			@{_id = [guid]::Empty}
+			@{_id = 0L}
+		) | Add-LiteData $test
+
+		$r = Get-LiteData $test
+		equals "$r" '{"_id":1} {"_id":2} {"_id":3} {"_id":4} {"_id":5}'
+	}
+}

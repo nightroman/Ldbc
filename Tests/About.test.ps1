@@ -10,8 +10,8 @@ function DemoAddGetRemove {
 		# add two documents
 		@{Name = 'John'}, @{Name = 'Mary'} | Add-LiteData $test
 
-		# find using filter with parameters
-		$r = Get-LiteData $test -Where '$.Name = @Name', @{Name = 'John'}
+		# find using filter with an argument
+		$r = Get-LiteData $test -Where '$.Name = @0', John
 		"$r" # {"_id":1,"Name":"John"}
 
 		# remove one by _id

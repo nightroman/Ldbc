@@ -72,12 +72,12 @@ task AsType {
 		# https://github.com/mbdavid/LiteDB/pull/1480
 		$r = Get-LiteData $test -As ([object])
 		equals $r.GetType() ([System.Collections.Generic.Dictionary[string, object]])
-		equals $r.Count 0
+		equals $r.Count 3
 
 		# https://github.com/mbdavid/LiteDB/pull/1480
 		$r = Get-LiteData $test -As ([hashtable])
 		equals $r.GetType() ([hashtable])
-		equals $r.Count 0
+		equals $r.Count 3
 	}
 }
 

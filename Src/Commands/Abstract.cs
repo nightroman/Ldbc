@@ -33,6 +33,14 @@ namespace Ldbc.Commands
 		}
 	}
 
+	static class WhereIdExpression
+	{
+		public static BsonExpression Input(object value)
+		{
+			return BsonExpression.Create("_id = @0", Actor.ToBsonValue(value));
+		}
+	}
+
 	class InputParameters
 	{
 		public readonly BsonDocument Parameters;

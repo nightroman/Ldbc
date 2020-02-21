@@ -14,19 +14,19 @@ namespace Ldbc.Commands
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
 		[Parameter(Position = 1, Mandatory = true)]
-		public object Where { set { _Where = Expression.Create(value); } }
-		Expression _Where;
+		public object Where { set { _Where = Expression.Input(value); } }
+		BsonExpression _Where;
 
 		[Parameter(Position = 2, Mandatory = true)]
-		public object Update { set { _Update = Expression.Create(value); } }
-		Expression _Update;
+		public object Update { set { _Update = Expression.Input(value); } }
+		BsonExpression _Update;
 
 		[Parameter]
 		public SwitchParameter Result { get; set; }
 
 		protected override void BeginProcessing()
 		{
-			var count = Collection.UpdateMany(_Update.BsonExpression, _Where.BsonExpression);
+			var count = Collection.UpdateMany(_Update, _Where);
 			if (Result)
 				WriteObject(count);
 		}

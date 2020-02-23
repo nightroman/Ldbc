@@ -126,36 +126,42 @@ namespace Ldbc.Commands
 					return;
 			}
 
-			var query = Collection.Query();
+			var query = new Query();
 
-			// Filter
-			if (_Where != null)
-				query = query.Where(_Where);
-
-			// OrderBy
-			if (_OrderBy != null)
-				query = query.OrderBy(_OrderBy, Order < 0 ? -1 : 1);
+			// Select
+			if (_Select != null)
+				query.Select = _Select;
 
 			// Include
 			if (_Include != null)
 			{
 				foreach (var it in _Include)
-					query = query.Include(BsonExpression.Create(it));
+					query.Includes.Add(BsonExpression.Create(it));
 			}
 
-			// Select and Skip
-			ILiteQueryableResult<BsonDocument> result;
-			if (_Select != null)
-				result = query.Select(_Select).Skip(Skip);
-			else
-				result = query.Skip(Skip);
+			// Where
+			if (_Where != null)
+				query.Where.Add(_Where);
 
-			// First
-			if (First > 0)
-				result = result.Limit(First);
+			// OrderBy
+			if (_OrderBy != null)
+				query.OrderBy = _OrderBy;
+
+			// Order
+			if (Order != 0)
+			{
+				query.Order = Order > 0 ? Query.Ascending : Query.Descending;
+				if (_OrderBy == null)
+					query.OrderBy = "_id";
+			}
+
+			//! https://github.com/mbdavid/LiteDB/issues/1506
+			// Skip & First
+			var skip = Skip > 0 ? Skip : 0;
+			var limit = First > 0 ? First : int.MaxValue;
 
 			var convert = ParameterAs.GetConvert(_As);
-			foreach (var doc in result.ToEnumerable())
+			foreach (var doc in Collection.Find(query, skip, limit))
 				WriteObject(convert(doc));
 		}
 	}

@@ -49,7 +49,7 @@ Use-LiteDatabase :memory: {
     @{Name = 'John'}, @{Name = 'Mary'} | Add-LiteData $test
 
     # find using filter with an argument
-    $r = Get-LiteData $test -Where '$.Name = @0', John
+    $r = Get-LiteData $test -Where 'Name = @0', John
     "$r" # {"_id":1,"Name":"John"}
 
     # remove one by _id
@@ -69,11 +69,11 @@ Use-LiteDatabase :memory: {
     Invoke-LiteCommand 'INSERT INTO Test : INT VALUES {Name: "John"}, {Name: "Mary"}' -Quiet
 
     # find using WHERE with parameters
-    $r = Invoke-LiteCommand 'SELECT $ FROM Test WHERE $.Name = @param1' @{param1 = 'John'}
+    $r = Invoke-LiteCommand 'SELECT $ FROM Test WHERE Name = @param1' @{param1 = 'John'}
     "$r" # {"_id":1,"Name":"John"}
 
     # remove using WHERE with parameters
-    Invoke-LiteCommand 'DELETE Test WHERE $._id = @_id' @{_id = 1} -Quiet
+    Invoke-LiteCommand 'DELETE Test WHERE _id = @_id' @{_id = 1} -Quiet
 
     # get all documents
     $r = Invoke-LiteCommand 'SELECT $ FROM Test'

@@ -7,19 +7,25 @@ using System.Management.Automation;
 
 namespace Ldbc.Commands
 {
-	[Cmdlet(VerbsData.Update, "LiteData")]
+	[Cmdlet(VerbsData.Update, "LiteData", DefaultParameterSetName = nsWhere)]
 	public sealed class UpdateDataCommand : Abstract
 	{
+		const string nsWhere = "Where";
+		const string nsById = "ById";
+
 		[Parameter(Position = 0, Mandatory = true)]
 		public ILiteCollection<BsonDocument> Collection { get; set; }
 
-		[Parameter(Position = 1, Mandatory = true)]
+		[Parameter(Position = 1, Mandatory = true, ParameterSetName = nsWhere)]
 		public object Where { set { _Where = Expression.Input(value); } }
 		BsonExpression _Where;
 
 		[Parameter(Position = 2, Mandatory = true)]
 		public object Update { set { _Update = Expression.Input(value); } }
 		BsonExpression _Update;
+
+		[Parameter(Mandatory = true, ParameterSetName = nsById)]
+		public object ById { set { _Where = WhereIdExpression.Input(value); } }
 
 		[Parameter]
 		public SwitchParameter Result { get; set; }

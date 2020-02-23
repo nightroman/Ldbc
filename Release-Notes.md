@@ -1,5 +1,10 @@
 # Ldbc Release Notes
 
+## v0.6.4
+
+- `Update-LiteData` - new parameter `ById`.
+- `Get-LiteData` - `Order` without `OrderBy` implies `_id`.
+
 ## v0.6.3
 
 LiteDB 5.0.3

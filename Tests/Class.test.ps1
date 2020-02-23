@@ -74,7 +74,7 @@ task DbRef {
 		equals "$r" '{"_id":1,"Customer":{"$id":1,"$ref":"customers"},"Products":[{"$id":1,"$ref":"products"},{"$id":2,"$ref":"products"}]}'
 
 		# raw, with refs
-		$r = Get-LiteData $orders -Include '$.Customer', '$.Products[*]'
+		$r = Get-LiteData $orders -Include 'Customer', 'Products[*]'
 		equals "$r" '{"_id":1,"Customer":{"_id":1,"Name":"John"},"Products":[{"_id":1,"Name":"Foo"},{"_id":2,"Name":"Bar"}]}'
 
 		# typed, no refs
@@ -82,7 +82,7 @@ task DbRef {
 		equals "$r" '#1 #1  [#1 , #2 ]'
 
 		# typed, with refs
-		$r = Get-LiteData $orders -As Order -Include '$.Customer', '$.Products[*]'
+		$r = Get-LiteData $orders -As Order -Include 'Customer', 'Products[*]'
 		equals "$r" '#1 #1 John [#1 Foo, #2 Bar]'
 	}
 }

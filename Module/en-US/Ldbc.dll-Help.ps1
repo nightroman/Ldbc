@@ -113,7 +113,7 @@ Specifies expressions for loading references.
 Example: Given $order is the collection of [Order] with references to single
 [Customer] and multiple [Product]
 
-	Get-LiteData $orders -As Order -Include '$.Customer', '$.Products[*]'
+	Get-LiteData $orders -As Order -Include 'Customer', 'Products[*]'
 '@
 	}
 	outputs = $AsOutputs
@@ -128,7 +128,7 @@ Example: Given $order is the collection of [Order] with references to single
 					$data | Add-LiteData $test
 
 					# query data using filter with parameters
-					Get-LiteData $test ('$.Name = @Name', @{Name = 'Mary'})
+					Get-LiteData $test ('Name = @Name', @{Name = 'Mary'})
 
 					# query strongly typed data
 					class MyData {[int]$Id; [string]$Name}
@@ -329,7 +329,7 @@ Tells to output the number of removed documents.
 					$data | Add-LiteData $test
 
 					# remove data using filter with parameters
-					Remove-LiteData $test ('$.Name = @Name', @{Name = 'Mary'})
+					Remove-LiteData $test ('Name = @Name', @{Name = 'Mary'})
 					Get-LiteData $test
 				}
 			}
@@ -358,6 +358,7 @@ update expression.
 	parameters = @{
 		Collection = $CollectionParameter
 		Where = $WhereParameter
+		ById = 'Specifies the document id.'
 		Update = $(
 			'Specifies the transformation expression.'
 			$ExpressionHelp
@@ -380,7 +381,7 @@ update expression.
 					Add-LiteData $test @{_id = 1; Name = 'John'}
 
 					# change Name using filter and update with parameters
-					$filter = '$.Name = @Name', @{Name = 'John'}
+					$filter = 'Name = @Name', @{Name = 'John'}
 					$update = '{Name : @Name}', @{Name = 'Mary'}
 					Update-LiteData $test $filter $update
 

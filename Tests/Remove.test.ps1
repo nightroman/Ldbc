@@ -10,11 +10,11 @@ task FilterWithParameters {
 		@{_id = 1}, @{_id = 2} | Add-LiteData $test
 
 		# remove using filter with parameter
-		$r = Remove-LiteData $test '$._id = @_id', @{_id = 1} -Result
+		$r = Remove-LiteData $test '_id = @_id', @{_id = 1} -Result
 		equals $r 1 #! was 0
 
 		# remove using hardcoded filter
-		$r = Remove-LiteData $test '$._id = 2' -Result
+		$r = Remove-LiteData $test '_id = 2' -Result
 		equals $r 1
 
 		equals $test.Count() 0
@@ -30,15 +30,15 @@ task DELETE_WithParameters {
 		@{_id = 1}, @{_id = 2}, @{_id = 3} | Add-LiteData $test
 
 		# parameter dictionary
-		$r = Invoke-LiteCommand 'DELETE test WHERE $._id = @_id' @{_id = 1}
+		$r = Invoke-LiteCommand 'DELETE test WHERE _id = @_id' @{_id = 1}
 		equals $r 1 #! was 0
 
 		# parameter argument
-		$r = Invoke-LiteCommand 'DELETE test WHERE $._id = @0' 2
+		$r = Invoke-LiteCommand 'DELETE test WHERE _id = @0' 2
 		equals $r 1 #! was 0
 
 		# hardcoded
-		$r = Invoke-LiteCommand 'DELETE test WHERE $._id = 3'
+		$r = Invoke-LiteCommand 'DELETE test WHERE _id = 3'
 		equals $r 1
 
 		equals $test.Count() 0

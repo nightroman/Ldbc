@@ -89,17 +89,17 @@ task CountAndExists {
 		@{name = 'John'; age = 42}, @{name = 'Mary'; age = 33} | Add-LiteData $test
 
 		# test Test-LiteData
-		equals (Test-LiteData $test '$.name = "Joe"') $false
-		equals (Test-LiteData $test '$.name = "John"') $true
-		equals (Test-LiteData $test '$.age > 20') $true
-		equals (Test-LiteData $test '$.age > 50') $false
+		equals (Test-LiteData $test 'name = "Joe"') $false
+		equals (Test-LiteData $test 'name = "John"') $true
+		equals (Test-LiteData $test 'age > 20') $true
+		equals (Test-LiteData $test 'age > 50') $false
 
 		# test Get-LiteData -Count
-		equals (Get-LiteData -Count $test '$.name = "Joe"') 0
-		equals (Get-LiteData -Count $test '$.name = "John"') 1
-		equals (Get-LiteData -Count $test '$.age > 20') 2
-		equals (Get-LiteData -Count $test '$.age > 40') 1
-		equals (Get-LiteData -Count $test '$.age > 50') 0
+		equals (Get-LiteData -Count $test 'name = "Joe"') 0
+		equals (Get-LiteData -Count $test 'name = "John"') 1
+		equals (Get-LiteData -Count $test 'age > 20') 2
+		equals (Get-LiteData -Count $test 'age > 40') 1
+		equals (Get-LiteData -Count $test 'age > 50') 0
 	}
 }
 
@@ -126,7 +126,7 @@ task FirstLastSkip {
 
 		# get where
 
-		$filter = '$._id >= 3 AND $._id <= 7'
+		$filter = '_id >= 3 AND _id <= 7'
 
 		$r = Get-LiteData $test $filter -First 2
 		equals "$r" '{"_id":3} {"_id":4}'
@@ -202,5 +202,23 @@ task ByIdWithSelect {
 		# existing
 		$r = Get-LiteData $test -ById 98 -Select '{r:p1}'
 		equals "$r" '{"r":23}'
+	}
+}
+
+# -Order without -OrderBy implies -OrderBy _id
+task JustOrder {
+	Use-LiteDatabase -Script {
+		$test = Get-LiteCollection Test
+
+		@{_id = 2}, @{_id = 1}, @{_id = 3} | Add-LiteData $test
+
+		$r = Get-LiteData $test
+		equals "$r" '{"_id":1} {"_id":2} {"_id":3}'
+
+		$r = Get-LiteData $test -Order 1
+		equals "$r" '{"_id":1} {"_id":2} {"_id":3}'
+
+		$r = Get-LiteData $test -Order -1
+		equals "$r" '{"_id":3} {"_id":2} {"_id":1}'
 	}
 }

@@ -15,10 +15,10 @@ Parametrized expressions - support both parameters and arguments notations:
 
 ```powershell
 # expression followed by IDictionary with named parameters
-X-LiteData .. -Where ('$x = @x AND $y = @y', @{x = 1; y = 2})
+X-LiteData .. -Where ('x = @x AND y = @y', @{x = 1; y = 2})
 
 # expression followed by indexed positional arguments
-X-LiteData .. -Where ('$x = @0 AND $y = @1', 1, 2)
+X-LiteData .. -Where ('x = @0 AND y = @1', 1, 2)
 ```
 
 ## v0.6.2

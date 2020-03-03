@@ -1,5 +1,9 @@
 # Ldbc Release Notes
 
+## v0.6.5
+
+Improve help, reflect recent changes.
+
 ## v0.6.4
 
 - `Update-LiteData` - new parameter `ById`.

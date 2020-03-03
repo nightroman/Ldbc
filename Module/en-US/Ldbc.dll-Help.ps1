@@ -40,11 +40,26 @@ Use New-LiteDatabase or Use-LiteDatabase in order to get the database instance.
 '@
 
 $ExpressionHelp = @'
-An expression may be string, Ldbc.Expression, or LiteDB.BsonExpression.
+The expression may be string, Ldbc.Expression, or LiteDB.BsonExpression.
 
-A string expression with parameters is followed by a dictionary with parameter values, e.g.
+An expression with named parameters or indexed arguments is followed by a
+parameter dictionary or argument values.
 
-	'.. @age .. @income ..', @{age = 40; income = 80}
+Separate expressions and arguments with commas.
+Parenthesis may be used but they are not required.
+Array notation @() may be used for multiline expressions.
+
+Examples:
+
+	'.. @x .. @y ..', @{x = 40; y = 80}
+
+	('.. @0 .. @1 ..', 40, 80)
+
+	@(
+		'.. @0 .. @1 ..'
+		<argument 0>
+		<argument 1>
+	)
 '@
 
 $ParametersParameter = @'
@@ -53,8 +68,14 @@ Specifies the expression named parameters (IDictionary) or indexed arguments (IL
 
 $DocumentInputs = @(
 	@{
-		type = 'PSCustomObject, IDictionary (Hashtable, Ldbc.Dictionary, LiteDB.BsonDocument, ...), ...'
-		description = 'Document-like objects.'
+		type = 'PSCustomObject, IDictionary, class'
+		description = @'
+Document-like objects.
+
+Dictionaries include Hashtable, Ldbc.Dictionary, LiteDB.BsonDocument, etc.
+
+PowerShell classes and .NET complex objects are serialized using LiteDB mappings.
+'@
 	}
 )
 
@@ -162,15 +183,25 @@ Use the pipeline for several input documents.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
-		InputObject = 'The input document.'
+		InputObject = 'The input document, see INPUTS.'
 		Bulk = $BulkParameter
-		Result = 'Tells to output document _id values or document count.'
+		Result = @'
+Tells to output inserted document ids or the number of inserted documents, if the switch Bulk is used.
+'@
 	}
 	inputs = $DocumentInputs
 	outputs = @(
 		@{
-			type = '[object]'
-			description = 'None, _id values, document count.'
+			type = 'none'
+			description = 'The cmdlet outputs nothing without the switch Result.'
+		}
+		@{
+			type = 'object'
+			description = 'Inserted document ids, if the switch Result is used.'
+		}
+		@{
+			type = 'int'
+			description = 'The number of inserted documents, if the switches Result and Bulk are used.'
 		}
 	)
 	examples = @(
@@ -226,28 +257,36 @@ The cmdlet replaces old documents in the collection with new input documents.
 One document may be specified as the parameter.
 Use the pipeline for several input documents.
 
-If the old document does not exist then the new is added if Add is set.
+If the old document does not exist then the new is inserted if the switch Add is used.
+Otherwise the new document is ignored.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
-		InputObject = 'The input document.'
+		InputObject = 'The input document, see INPUTS.'
 		Add = @'
-Tells to add the new document if the old does not exist.'
+Tells to insert the new document if the old does not exist.'
 '@
 		Bulk = $BulkParameter
 		Result = @'
 Tells to output
-the number of replaced documents (Add is not set) or
-the number of added documents (Add is set).
+the number of replaced documents (Add is not used) or
+the number of added documents (Add is used).
 '@
 	}
 	inputs = $DocumentInputs
 	outputs = @(
 		@{
-			type = '[int]'
+			type = 'none'
 			description = @'
-The number of replaced documents (Add is not set) or
-the number of added documents (Add is set).
+The cmdlet outputs nothing without the switch Result.
+'@
+		}
+		@{
+			type = 'int'
+			description = @'
+If the switch Result is used,
+the number of replaced documents (Add is not used) or
+the number of added documents (Add is used).
 '@
 		}
 	)
@@ -283,10 +322,10 @@ the number of added documents (Add is set).
 ### Test-LiteData
 @{
 	command = 'Test-LiteData'
-	synopsis = 'Gets true if the query returns any document.'
+	synopsis = 'Gets true if the query matches any document.'
 	description = @'
-The cmdlet gets true if the specified query returns any document.
-This method does not deserialize any document.
+The cmdlet gets true if the specified query matches any document.
+This method does not deserialize data.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
@@ -295,8 +334,8 @@ This method does not deserialize any document.
 	}
 	outputs = @(
 		@{
-			type = '[bool'
-			description = 'True if the query returns any document.'
+			type = 'bool'
+			description = 'True if the query matches any document.'
 		}
 	)
 }

@@ -4,11 +4,23 @@ LiteDB Cmdlets for PowerShell
 
 ***
 
-Ldbc is the PowerShell module based on [LiteDB](https://www.litedb.org),
+Ldbc is the PowerShell module with [LiteDB](https://www.litedb.org),
 a small, fast and lightweight .NET NoSQL embedded database.
-Ldbc makes LiteDB data and operations PowerShell friendly.
 
 The module works with Windows PowerShell v3-v5 .NET Framework 4.5 and PowerShell Core.
+
+Some LiteDB features:
+
+- Single datafile
+- ACID transactions
+- Store files and stream data
+- Cross collections references
+- Recovery after writing failures
+- Mapping classes to documents
+
+Ldbc makes LiteDB operations and data PowerShell friendly. You can store and
+retrieve hashtables and dictionaries, PowerShell classes and custom objects,
+.NET complex types. Operate on data using specialized cmdlets or LiteDB SQL.
 
 ## Quick start
 
@@ -81,7 +93,7 @@ Use-LiteDatabase :memory: {
 }
 ```
 
-(c) store some PS objects and get back as PS custom objects
+(c) store and retrieve PowerShell custom objects
 
 ```powershell
 Use-LiteDatabase :memory: {

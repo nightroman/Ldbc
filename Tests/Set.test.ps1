@@ -66,8 +66,8 @@ task UpsertId0 {
 	}
 }
 
-#_200223_064239
-task AddDefaultId {
+#_200223_064239, more comprehensive test is in Add
+task DefaultId {
 	Use-LiteDatabase :memory: {
 		$test = Get-LiteCollection Test Int32
 
@@ -78,6 +78,6 @@ task AddDefaultId {
 		Set-LiteData $test -Add @{_id = 0L}
 
 		$r = Get-LiteData $test
-		equals "$r" '{"_id":1} {"_id":2} {"_id":3} {"_id":4} {"_id":5}'
+		equals "$r" '{"_id":{"$numberLong":"0"}} {"_id":1} {"_id":2} {"_id":{"$oid":"000000000000000000000000"}} {"_id":{"$guid":"00000000-0000-0000-0000-000000000000"}}'
 	}
 }

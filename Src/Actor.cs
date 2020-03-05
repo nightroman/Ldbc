@@ -289,26 +289,29 @@ namespace Ldbc
 			return script.InvokeWithContext(null, vars);
 		}
 		//_200223_064239
-		public static void RemoveDefaultId(BsonDocument doc)
+		public static void RemoveDefaultId(BsonDocument doc, BsonAutoId autoId)
 		{
 			if (doc.TryGetValue("_id", out var id))
 			{
 				if (id.IsNull
-					|| id.IsInt32 && id.AsInt32 == 0
-					|| id.IsObjectId && id.AsObjectId == ObjectId.Empty
-					|| id.IsGuid && id.AsGuid == Guid.Empty
-					|| id.IsInt64 && id.AsInt64 == 0L)
+					|| autoId == BsonAutoId.Int32 && id.IsInt32 && id.AsInt32 == 0
+					|| autoId == BsonAutoId.ObjectId && id.IsObjectId && id.AsObjectId == ObjectId.Empty
+					|| autoId == BsonAutoId.Guid && id.IsGuid && id.AsGuid == Guid.Empty
+					|| autoId == BsonAutoId.Int64 && id.IsInt64 && id.AsInt64 == 0L)
 				{
 					doc.Remove("_id");
 				}
 			}
 		}
 		//_200223_064239
-		public static BsonDocument ToBsonDocumentNoDefaultId(object value)
+		public static Func<object, BsonDocument> ToBsonDocumentNoDefaultId(BsonAutoId autoid)
 		{
-			var doc = ToBsonDocument(value);
-			RemoveDefaultId(doc);
-			return doc;
+			return value =>
+			{
+				var doc = ToBsonDocument(value);
+				RemoveDefaultId(doc, autoid);
+				return doc;
+			};
 		}
 	}
 }

@@ -30,8 +30,13 @@ namespace Ldbc.Commands
 
 		int _count = 0;
 
+		System.Func<object, BsonDocument> _convert; //rk temp
+
 		protected override void BeginProcessing()
 		{
+			if (Add)
+				_convert = Actor.ToBsonDocumentNoDefaultId(Collection.AutoId());
+
 			if (Bulk)
 				_bulk = new List<object>();
 		}
@@ -51,7 +56,7 @@ namespace Ldbc.Commands
 			{
 				if (Add)
 				{
-					if (Collection.Upsert(Actor.ToBsonDocumentNoDefaultId(InputObject)))
+					if (Collection.Upsert(_convert(InputObject)))
 						++_count;
 				}
 				else

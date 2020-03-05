@@ -85,19 +85,67 @@ task InsertId0 {
 }
 
 #_200223_064239
-task AddDefaultId {
+task DefaultId_Int32 {
 	Use-LiteDatabase :memory: {
 		$test = Get-LiteCollection Test Int32
-
 		$(
-			@{_id = $null}
-			@{_id = 0}
-			@{_id = [LiteDB.ObjectId]::Empty}
-			@{_id = [guid]::Empty}
-			@{_id = 0L}
+			@{_id = $null; t = 'null'}
+			@{_id = 0; t = 'int'}
+			@{_id = [LiteDB.ObjectId]::Empty; t = 'oid'}
+			@{_id = [guid]::Empty; t = 'guid'}
+			@{_id = 0L; t = 'long' }
 		) | Add-LiteData $test
-
 		$r = Get-LiteData $test
-		equals "$r" '{"_id":1} {"_id":2} {"_id":3} {"_id":4} {"_id":5}'
+		equals "$r" '{"_id":{"$numberLong":"0"},"t":"long"} {"_id":1,"t":"null"} {"_id":2,"t":"int"} {"_id":{"$oid":"000000000000000000000000"},"t":"oid"} {"_id":{"$guid":"00000000-0000-0000-0000-000000000000"},"t":"guid"}'
+	}
+}
+
+#_200223_064239
+task DefaultId_Int64 {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test Int64
+		$(
+			@{_id = $null; t = 'null'}
+			@{_id = 0; t = 'int'}
+			@{_id = [LiteDB.ObjectId]::Empty; t = 'oid'}
+			@{_id = [guid]::Empty; t = 'guid'}
+			@{_id = 0L; t = 'long' }
+		) | Add-LiteData $test
+		$r = Get-LiteData $test
+		equals "$r" '{"_id":0,"t":"int"} {"_id":{"$numberLong":"1"},"t":"null"} {"_id":{"$numberLong":"2"},"t":"long"} {"_id":{"$oid":"000000000000000000000000"},"t":"oid"} {"_id":{"$guid":"00000000-0000-0000-0000-000000000000"},"t":"guid"}'
+	}
+}
+
+#_200223_064239
+task DefaultId_Oid {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test
+		$(
+			@{_id = $null; t = 'null'}
+			@{_id = 0; t = 'int'}
+			@{_id = [LiteDB.ObjectId]::Empty; t = 'oid'}
+			@{_id = [guid]::Empty; t = 'guid'}
+			#! cannot, duplicate key 0: @{_id = 0L; t = 'long' }
+		) | Add-LiteData $test
+		$r = Get-LiteData $test
+		Write-Host "$r"
+		assert ("$r" -match '^{"_id":0,"t":"int"} {"_id":{"\$oid":"\w+"},"t":"null"} {"_id":{"\$oid":"\w+"},"t":"oid"} {"_id":{"\$guid":"00000000-0000-0000-0000-000000000000"},"t":"guid"}')
+	}
+}
+
+#_200223_064239
+task DefaultId_Guid {
+	Use-LiteDatabase :memory: {
+		$test = Get-LiteCollection Test Guid
+		$(
+			@{_id = $null; t = 'null'}
+			@{_id = 0; t = 'int'}
+			@{_id = [LiteDB.ObjectId]::Empty; t = 'oid'}
+			@{_id = [guid]::Empty; t = 'guid'}
+			#! cannot, duplicate key 0: @{_id = 0L; t = 'long' }
+		) | Add-LiteData $test
+		$r = Get-LiteData $test
+		Write-Host "$r"
+		assert ("$r" -match '^{"_id":0,"t":"int"} {"_id":{"\$oid":"000000000000000000000000"},"t":"oid"} {"_id":{"\$guid":".{36}"},"t":".{4}"} {"_id":{"\$guid":".{36}"},"t":".{4}"}')
 	}
 }

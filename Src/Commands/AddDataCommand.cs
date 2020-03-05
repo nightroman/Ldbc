@@ -7,9 +7,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using System.Reflection;
 
 namespace Ldbc.Commands
 {
+	static class CollectionExt //rk temp
+	{
+		static readonly FieldInfo _autoiId = typeof(LiteCollection<BsonDocument>).GetField("_autoId", BindingFlags.Instance | BindingFlags.NonPublic);
+		public static BsonAutoId AutoId(this ILiteCollection<BsonDocument> collection)
+		{
+			return (BsonAutoId)_autoiId.GetValue(collection);
+		}
+	}
+
 	[Cmdlet(VerbsCommon.Add, "LiteData")]
 	public sealed class AddDataCommand : Abstract
 	{
@@ -26,8 +36,11 @@ namespace Ldbc.Commands
 		public SwitchParameter Bulk { get; set; }
 		List<object> _bulk;
 
+		BsonAutoId _autoId; //rk temp
+
 		protected override void BeginProcessing()
 		{
+			_autoId = Collection.AutoId();
 			if (Bulk)
 				_bulk = new List<object>();
 		}
@@ -46,7 +59,7 @@ namespace Ldbc.Commands
 			try
 			{
 				var document = Actor.ToBsonDocument(InputObject);
-				Actor.RemoveDefaultId(document);
+				Actor.RemoveDefaultId(document, _autoId);
 				var id = Collection.Insert(document);
 				if (Result)
 					WriteObject(Actor.ToObject(id));
@@ -66,7 +79,8 @@ namespace Ldbc.Commands
 			if (!Bulk)
 				return;
 
-			var count = Collection.Insert(_bulk.Select(Actor.ToBsonDocumentNoDefaultId));
+			var convert = Actor.ToBsonDocumentNoDefaultId(_autoId);
+			var count = Collection.Insert(_bulk.Select(convert));
 			if (Result)
 				WriteObject(count);
 		}

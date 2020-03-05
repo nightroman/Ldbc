@@ -90,3 +90,55 @@ task FileSystemInfo {
 
 	$Database.Dispose()
 }
+
+task DefaultsMayChangeData {
+	[LiteDB.BsonMapper]::Global | Out-String
+	equals ([LiteDB.BsonMapper]::Global.SerializeNullValues) $false
+	equals ([LiteDB.BsonMapper]::Global.TrimWhitespace) $true
+	equals ([LiteDB.BsonMapper]::Global.EmptyStringToNull) $true
+	equals ([LiteDB.BsonMapper]::Global.EnumAsInteger) $false
+
+	$Database = New-LiteDatabase
+
+	$test = Get-LiteCollection test1
+	Add-LiteData $test ([ordered]@{
+		_id = 1
+		null = $null
+		empty = ''
+		white = '  '
+		spaces = '  bar  '
+		enum = [ConsoleColor]::Black
+	})
+
+	$r = Get-LiteData $test
+	$r.Print()
+	equals $r.null $null
+	equals $r.empty ''
+	equals $r.white '  '
+	equals $r.spaces '  bar  '
+	equals $r.enum 'Black'
+
+	class MyDefaults {
+		[int] $_id = 1
+		[object] $nullObject = $null
+		[string] $nullString = $null
+		[string] $empty = ''
+		[string] $white = '  '
+		[string] $spaces = '  bar  '
+		[ConsoleColor] $enum = [ConsoleColor]::Black
+	}
+
+	$test = Get-LiteCollection test2
+	Add-LiteData $test ([MyDefaults]::new())
+
+	$r = Get-LiteData $test
+	$r.Print()
+	assert (!$r.ContainsKey('nullObject'))
+	equals $r.nullString $null
+	equals $r.empty $null
+	equals $r.white $null
+	equals $r.spaces 'bar'
+	equals $r.enum 'Black'
+
+	$Database.Dispose()
+}

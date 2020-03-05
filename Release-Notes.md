@@ -1,5 +1,11 @@
 # Ldbc Release Notes
 
+## v0.6.6
+
+Temporary workaround for inserting documents with default ids which types are
+different from the collection auto id type. So far it was not possible to add
+ids 0, 0L, Guid.Empty, ObjectId.Empty.
+
 ## v0.6.5
 
 Improve help, reflect recent changes.

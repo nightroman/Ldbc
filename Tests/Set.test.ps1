@@ -26,23 +26,6 @@ task Basic {
 	}
 }
 
-task Bulk {
-	Use-LiteDatabase :memory: {
-		$test = Get-LiteCollection Test
-
-		# add bulk (use duplicated key)
-		$r = @{_id=1}, @{_id=1; p=1}, @{_id=2; p=2} | Set-LiteData $test -Add -Bulk -Result
-		equals $r 2
-
-		# set bulk (use missing key)
-		$r = @{_id=1; p=2}, @{_id=2; p=3}, @{_id=3; p=4} | Set-LiteData $test -Bulk -Result
-		equals $r 2
-
-		$r = Get-LiteData $test
-		equals "$r" '{"_id":1,"p":2} {"_id":2,"p":3}'
-	}
-}
-
 # https://github.com/mbdavid/LiteDB/issues/1451
 task UpdateInMissingCollection {
 	Use-LiteDatabase :memory: {

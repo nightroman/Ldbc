@@ -304,12 +304,12 @@ namespace Ldbc
 			}
 		}
 		//_200223_064239
-		public static Func<object, BsonDocument> ToBsonDocumentNoDefaultId(BsonAutoId autoid)
+		public static Func<object, BsonDocument> ToBsonDocumentNoDefaultId(BsonAutoId autoId)
 		{
 			return value =>
 			{
 				var doc = ToBsonDocument(value);
-				RemoveDefaultId(doc, autoid);
+				RemoveDefaultId(doc, autoId);
 				return doc;
 			};
 		}

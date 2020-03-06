@@ -32,7 +32,7 @@ $MetaParam = @{
 task Meta @MetaParam {
 	$Version = Get-Version
 	$Project = 'https://github.com/nightroman/Ldbc'
-	$Summary = 'Ldbc module - LiteDB Cmdlets for PowerShell'
+	$Summary = 'LiteDB Cmdlets, the document store in PowerShell'
 	$Copyright = 'Copyright (c) Roman Kuzmin'
 
 	Set-Content Module\$ModuleName.psd1 @"

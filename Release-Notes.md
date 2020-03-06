@@ -1,5 +1,14 @@
 # Ldbc Release Notes
 
+## v0.7.0
+
+Removed parameters `Bulk`. It turns out using transactions gives practically
+the same performance improvement as using bulk operations (apparently due to
+bulk automatic transactions). Besides, in Ldbc bulks require more memory.
+
+New switch `Transaction` of `Use-LiteDatabase` tells to use a transaction.
+This makes using transactions easier, e.g. for better "bulks" performance.
+
 ## v0.6.6
 
 Temporary workaround for inserting documents with default ids which types are

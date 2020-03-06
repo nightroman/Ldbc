@@ -2,7 +2,7 @@ TOPIC
     about_Ldbc
 
 SHORT DESCRIPTION
-    LiteDB Cmdlets for PowerShell
+    LiteDB Cmdlets, the document store in PowerShell
 
 LONG DESCRIPTION
     The module provides the following commands:

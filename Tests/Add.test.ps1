@@ -25,29 +25,6 @@ task Result {
 	}
 }
 
-task Bulk {
-	Use-LiteDatabase :memory: {
-		$test = Get-LiteCollection Test
-
-		try {
-			# add bulk with duplicated keys
-			@{_id=1}, @{_id=1} | Add-LiteData $test -Bulk
-			throw
-		}
-		catch {
-			equals "$_" "Cannot insert duplicate key in unique index '_id'. The duplicate value is '1'."
-		}
-
-		# bulk is undone
-		equals $test.Count() 0
-
-		# add normal bulk
-		$r = @{_id=1}, @{_id=2} | Add-LiteData $test -Bulk -Result
-		equals $r 2
-		equals $test.Count() 2
-	}
-}
-
 task AddWithError {
 	Use-LiteDatabase :memory: {
 		$test = Get-LiteCollection Test

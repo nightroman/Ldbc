@@ -19,12 +19,6 @@ $AsOutputs = @(
 	}
 )
 
-$BulkParameter = @'
-Tells to collect documents from the pipeline and invoke bulk processing.
-This way works faster and provides an automatic transaction for the bulk.
-But it may require more memory and get less output and error information.
-'@
-
 $CollectionNameParameter = @'
 The collection name, case insensitive.
 '@
@@ -89,7 +83,7 @@ $WhereParameter = $(
 	command = 'Get-LiteData'
 	synopsis = 'Gets data from the collection.'
 	description = @'
-The cmdlets gets data specified by the parameters from the collection.
+The cmdlet gets data specified by the parameters from the collection.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
@@ -180,14 +174,13 @@ Example: Given $order is the collection of [Order] with references to single
 The cmdlet inserts input documents to the collection.
 One document may be specified as the parameter.
 Use the pipeline for several input documents.
+
+For several documents or calls consider using a transaction for better performance.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
 		InputObject = 'The input document, see INPUTS.'
-		Bulk = $BulkParameter
-		Result = @'
-Tells to output inserted document ids or the number of inserted documents, if the switch Bulk is used.
-'@
+		Result = 'Tells to output inserted document ids.'
 	}
 	inputs = $DocumentInputs
 	outputs = @(
@@ -198,10 +191,6 @@ Tells to output inserted document ids or the number of inserted documents, if th
 		@{
 			type = 'object'
 			description = 'Inserted document ids, if the switch Result is used.'
-		}
-		@{
-			type = 'int'
-			description = 'The number of inserted documents, if the switches Result and Bulk are used.'
 		}
 	)
 	examples = @(
@@ -259,14 +248,15 @@ Use the pipeline for several input documents.
 
 If the old document does not exist then the new is inserted if the switch Add is used.
 Otherwise the new document is ignored.
+
+For several documents or calls consider using a transaction for better performance.
 '@
 	parameters = @{
 		Collection = $CollectionParameter
 		InputObject = 'The input document, see INPUTS.'
 		Add = @'
-Tells to insert the new document if the old does not exist.'
+Tells to insert the new document if the old does not exist.
 '@
-		Bulk = $BulkParameter
 		Result = @'
 Tells to output
 the number of replaced documents (Add is not used) or
@@ -527,9 +517,17 @@ Merge-Helps $DatabaseBase @{
 The cmdlet opens new or existing database, creates the variable $Database for
 it, and invokes the specified script. When the script completes or fails the
 database is automatically disposed.
+
+Use the switch Transaction in order to invoke multiple changes in a transaction.
+Note that using transactions may significantly improve performance as well.
 '@
 	parameters = @{
 		Script = 'The script operating on the database.'
+		Transaction = @'
+Tells to use a transaction.
+If the script completes the transaction is committed.
+If the script terminates due to an error the transaction is aborted.
+'@
 	}
 	outputs = @(
 		@{
@@ -564,6 +562,11 @@ The cmdlet creates a new transaction or continues using the existing in the
 same thread. Then it invokes the specified script. The new transaction is
 automatically committed or aborted depending on the script completion or
 failure.
+
+If you use a single transaction then `Use-LiteDatabase -Transaction` may do the
+same trick as using this cmdlet.
+
+NOTE: Using a transaction for multiple changes may improve overall performance.
 '@
 	parameters = @{
 		Database = $DatabaseParameter
@@ -583,6 +586,9 @@ failure.
 						$Database
 					}
 				}
+
+				# Or you may tell to use transaction like this:
+				# Use-LiteDatabase :memory: -Transaction {...}
 			}
 			test = {
 				$r = . $args[0]

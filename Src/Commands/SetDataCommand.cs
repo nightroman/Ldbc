@@ -3,8 +3,6 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 
 using LiteDB;
-using System.Collections.Generic;
-using System.Linq;
 using System.Management.Automation;
 
 namespace Ldbc.Commands
@@ -24,33 +22,20 @@ namespace Ldbc.Commands
 		[Parameter]
 		public SwitchParameter Result { get; set; }
 
-		[Parameter]
-		public SwitchParameter Bulk { get; set; }
-		List<object> _bulk;
-
 		int _count = 0;
 
-		System.Func<object, BsonDocument> _convert; //rk temp
+		System.Func<object, BsonDocument> _convert;
 
 		protected override void BeginProcessing()
 		{
 			if (Add)
 				_convert = Actor.ToBsonDocumentNoDefaultId(Collection.AutoId());
-
-			if (Bulk)
-				_bulk = new List<object>();
 		}
 
 		protected override void ProcessRecord()
 		{
 			if (InputObject == null)
 				throw new PSArgumentException(Res.InputDocNull);
-
-			if (Bulk)
-			{
-				_bulk.Add(InputObject);
-				return;
-			}
 
 			try
 			{
@@ -73,14 +58,6 @@ namespace Ldbc.Commands
 
 		protected override void EndProcessing()
 		{
-			if (Bulk)
-			{
-				if (Add)
-					_count = Collection.Upsert(_bulk.Select(Actor.ToBsonDocument));
-				else
-					_count = Collection.Update(_bulk.Select(Actor.ToBsonDocument));
-			}
-
 			if (Result)
 				WriteObject(_count);
 		}

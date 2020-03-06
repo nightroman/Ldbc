@@ -1,6 +1,6 @@
 # Ldbc
 
-LiteDB Cmdlets for PowerShell
+LiteDB Cmdlets, the document store in PowerShell
 
 ***
 

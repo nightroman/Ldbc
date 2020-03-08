@@ -79,7 +79,7 @@ namespace Ldbc
 
 			// case: custom
 			if (custom != null)
-				return ToBsonDocumentFromProperties(null, custom, null, depth);
+				return ToBsonDocumentFromCustom(custom, depth);
 
 			// case: BsonValue
 			if (value is BsonValue bson)
@@ -96,7 +96,7 @@ namespace Ldbc
 
 			// case: dictionary
 			if (value is IDictionary dictionary)
-				return ToBsonDocumentFromDictionary(null, dictionary, null, depth);
+				return ToBsonDocumentFromDictionary(dictionary, depth);
 
 			// case: bytes or collection
 			if (value is IEnumerable en)
@@ -113,139 +113,66 @@ namespace Ldbc
 			// serialize value
 			return BsonMapper.Global.Serialize(value.GetType(), value);
 		}
-		//! IConvertibleToBsonDocument (e.g. Mdbc.Dictionary) must be converted before if source and properties are null
-		static BsonDocument ToBsonDocumentFromDictionary(BsonDocument source, IDictionary dictionary, IList<Selector> properties, int depth)
+		//! Normally BsonDocument should be converted before.
+		//! But: // (a) properties; (b) Dictionary(Dictionary|BsonDocument).
+		static BsonDocument ToBsonDocumentFromDictionary(IDictionary dictionary, int depth)
 		{
 			IncSerializationDepth(ref depth);
 
-#if DEBUG
-			if (source == null && properties == null && (dictionary is Dictionary || dictionary is BsonDocument))
-				throw new InvalidOperationException("DEBUG: must be converted before.");
-#endif
-
-			// use source or new document
-			var document = source ?? new BsonDocument();
-
-			if (properties == null || properties.Count == 0)
+			var document = new BsonDocument();
+			foreach (DictionaryEntry de in dictionary)
 			{
-				foreach (DictionaryEntry de in dictionary)
-				{
-					if (de.Key is string name)
-						document.Add(name, ToBsonValue(de.Value, depth));
-					else
-						throw new InvalidOperationException("Dictionary keys must be strings.");
-				}
-			}
-			else
-			{
-				foreach (var selector in properties)
-				{
-					if (selector.PropertyName != null)
-					{
-						if (dictionary.Contains(selector.PropertyName))
-							document.Add(selector.DocumentName, ToBsonValue(dictionary[selector.PropertyName], depth));
-					}
-					else
-					{
-						document.Add(selector.DocumentName, ToBsonValue(selector.GetValue(dictionary), depth));
-					}
-				}
+				if (de.Key is string name)
+					document.Add(name, ToBsonValue(de.Value, depth));
+				else
+					throw new InvalidOperationException("Dictionary keys must be strings.");
 			}
 
 			return document;
 		}
-		// Input supposed to be not null
-		static BsonDocument ToBsonDocumentFromProperties(BsonDocument source, PSObject value, IList<Selector> properties, int depth)
+		// Input is not null and not PSObject
+		static BsonDocument ToBsonDocumentFromComplex(object value, int depth)
 		{
 			IncSerializationDepth(ref depth);
 
-			var type = value.BaseObject.GetType();
+			var type = value.GetType();
 			if (type.IsPrimitive || type == typeof(string))
 				throw new InvalidOperationException(Res.CannotConvert2(type, nameof(BsonDocument)));
 
-			// propertied omitted (null) of all (0)?
-			if (properties == null || properties.Count == 0)
+			try
 			{
-				// if properties omitted (null) and the top (1) native object is not custom
-				if (properties == null && depth == 1 && (!(value.BaseObject is PSCustomObject)))
-				{
-					try
-					{
-						return BsonMapper.Global.Serialize(type, value.BaseObject).AsDocument;
-					}
-					catch (SystemException exn)
-					{
-						throw new InvalidOperationException(Res.CannotConvert3(type, nameof(BsonDocument), exn.Message), exn);
-					}
-				}
-				else
-				{
-					// convert all properties to the source or new document
-					var document = source ?? new BsonDocument();
-					foreach (var pi in value.Properties)
-					{
-						try
-						{
-							document.Add(pi.Name, ToBsonValue(pi.Value, depth));
-						}
-						catch (GetValueException) // .Value may throw, e.g. ExitCode in Process
-						{
-							document.Add(pi.Name, BsonValue.Null);
-						}
-						catch (SystemException exn)
-						{
-							if (depth == 1)
-								throw new InvalidOperationException(Res.CannotConvert3(type, nameof(BsonDocument), exn.Message), exn);
-							else
-								throw;
-						}
-					}
-					return document;
-				}
+				return BsonMapper.Global.Serialize(type, value).AsDocument;
 			}
-			else
+			catch (Exception exn)
 			{
-				// existing or new document
-				var document = source ?? new BsonDocument();
-				foreach (var selector in properties)
-				{
-					if (selector.PropertyName != null)
-					{
-						var pi = value.Properties[selector.PropertyName];
-						if (pi != null)
-						{
-							try
-							{
-								document.Add(selector.DocumentName, ToBsonValue(pi.Value, depth));
-							}
-							catch (GetValueException) // .Value may throw, e.g. ExitCode in Process
-							{
-								document.Add(selector.DocumentName, BsonValue.Null);
-							}
-						}
-					}
-					else
-					{
-						document.Add(selector.DocumentName, ToBsonValue(selector.GetValue(value), depth));
-					}
-				}
+				throw new InvalidOperationException(Res.CannotConvert3(type, nameof(BsonDocument), exn.Message), exn);
+			}
+		}
+		// Input is not null
+		static BsonDocument ToBsonDocumentFromCustom(PSObject value, int depth)
+		{
+			IncSerializationDepth(ref depth);
+			try
+			{
+				var document = new BsonDocument();
+				foreach (var pi in value.Properties)
+					document.Add(pi.Name, ToBsonValue(pi.Value, depth));
 				return document;
+			}
+			catch (Exception exn)
+			{
+				throw new InvalidOperationException(Res.CannotConvert3(value.BaseObject.GetType(), nameof(BsonDocument), exn.Message), exn);
 			}
 		}
 		//! For external use only.
 		public static BsonDocument ToBsonDocument(object value)
 		{
-			return ToBsonDocument(null, value, null, 0);
-		}
-		//! For external use only.
-		public static BsonDocument ToBsonDocument(BsonDocument source, object value, IList<Selector> properties)
-		{
-			return ToBsonDocument(source, value, properties, 0);
+			return ToBsonDocument(value, 0);
 		}
 		//! For external use only.
 		internal static BsonDocument ToBsonDocumentFromDictionary(IDictionary value)
 		{
-			return ToBsonDocumentFromDictionary(null, value, null, 0);
+			return ToBsonDocumentFromDictionary(value, 0);
 		}
 		static BsonDocument TryBsonDocument(object value)
 		{
@@ -257,26 +184,25 @@ namespace Ldbc
 
 			return null;
 		}
-		static BsonDocument ToBsonDocument(BsonDocument source, object value, IList<Selector> properties, int depth)
+		static BsonDocument ToBsonDocument(object value, int depth)
 		{
 			value = BaseObject(value, out PSObject custom);
 
-			// reuse existing document
+			// custom
+			if (custom != null)
+				return ToBsonDocumentFromCustom(custom, depth);
+
+			// document
 			var document = TryBsonDocument(value);
 			if (document != null)
-			{
-				// reuse
-				if (source == null && properties == null)
-					return document;
+				return document;
 
-				// wrap, we need IDictionary, BsonDocument is not
-				return ToBsonDocumentFromDictionary(source, new Dictionary(document), properties, depth);
-			}
-
+			// dictionary
 			if (value is IDictionary dictionary)
-				return ToBsonDocumentFromDictionary(source, dictionary, properties, depth);
+				return ToBsonDocumentFromDictionary(dictionary, depth);
 
-			return ToBsonDocumentFromProperties(source, custom ?? new PSObject(value), properties, depth);
+			// complex
+			return ToBsonDocumentFromComplex(value, depth);
 		}
 		static void IncSerializationDepth(ref int depth)
 		{

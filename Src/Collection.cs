@@ -34,17 +34,9 @@ namespace Ldbc
 			if (collection == null)
 				throw new ArgumentNullException(nameof(collection));
 
-			if (collection is Collection that) //??
-			{
-				var json = JsonSerializer.Serialize(that._array);
-				_array = JsonSerializer.Deserialize(json).AsArray;
-			}
-			else
-			{
-				_array = new BsonArray();
-				foreach (var item in collection)
-					_array.Add(Actor.ToBsonValue(item));
-			}
+			_array = new BsonArray();
+			foreach (var item in collection)
+				_array.Add(Actor.ToBsonValue(item));
 		}
 		public BsonArray ToBsonArray()
 		{

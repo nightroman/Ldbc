@@ -132,7 +132,7 @@ should be used directly. Ldbc is the helper, not replacement.
 | Count | Get-LiteData -Count | count
 | Exists | Test-LiteData | true or false
 | Find* | Get-LiteData | documents
-| Insert | Add-LiteData | none, id, count
+| Insert | Add-LiteData | none, ids
 | Update | Set-LiteData | none, count
 | Upsert | Set-LiteData -Add | none, count
 | UpdateMany | Update-LiteData | none, count

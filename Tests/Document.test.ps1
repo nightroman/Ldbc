@@ -69,3 +69,28 @@ task ToBsonArray {
 	$b = [LiteDB.BsonArray]$d
 	assert ([object]::ReferenceEquals($b, $d.ToBsonArray()))
 }
+
+task Constructor {
+	# from BsonDocument, wrap
+	$b1 = [LiteDB.BsonDocument]::new()
+	$d1 = [Ldbc.Dictionary]::new($b1)
+	assert ([object]::ReferenceEquals($d1.ToBsonDocument(), $b1))
+
+	# from Hashtable, convert
+	$d1 = [Ldbc.Dictionary]::new(@{p1 = 1; a1 = @(1,2)})
+	equals $d1.p1 1
+
+	# from another Dictionary, deep clone
+	$d2 = [Ldbc.Dictionary]::new($d1)
+	equals $d2.p1 1
+	assert (![object]::ReferenceEquals($d1.ToBsonDocument(), $d2.ToBsonDocument()))
+	assert (![object]::ReferenceEquals($d1.a1.ToBsonArray(), $d2.a1.ToBsonArray()))
+
+	# cast, not constructor!
+	$d3 = [Ldbc.Dictionary]$d2
+	assert ([object]::ReferenceEquals($d2, $d3))
+
+	# but this is constructor!
+	$d4 = [Ldbc.Dictionary]$b1
+	assert ([object]::ReferenceEquals($d4.ToBsonDocument(), $b1))
+}

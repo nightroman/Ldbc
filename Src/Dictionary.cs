@@ -32,22 +32,13 @@ namespace Ldbc
 		/// <summary>
 		/// Deep clone or convert dictionaries.
 		/// </summary>
-		//! IDictionary, not just Mdbc.Dictionary, for assigning @{...} to typed Mdbc.Dictionary variables and members.
 		[Obsolete("Designed for scripts.")]
 		public Dictionary(IDictionary document)
 		{
 			if (document == null)
 				throw new ArgumentNullException(nameof(document));
 
-			if (document is Dictionary that) //??
-			{
-				var json = JsonSerializer.Serialize(that._document);
-				_document = JsonSerializer.Deserialize(json).AsDocument;
-			}
-			else
-			{
-				_document = Actor.ToBsonDocumentFromDictionary(document);
-			}
+			_document = Actor.ToBsonDocumentFromDictionary(document);
 		}
 		public BsonDocument ToBsonDocument()
 		{

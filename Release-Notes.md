@@ -1,5 +1,11 @@
 # Ldbc Release Notes
 
+## v0.7.1
+
+LiteDB 5.0.4
+
+Tidy up and simplify data conversion to documents.
+
 ## v0.7.0
 
 Removed parameters `Bulk`. It turns out using transactions gives practically

@@ -3,7 +3,5 @@ bin/
 obj/
 Src/Properties/
 z
-*.bson
-AssemblyInfo.cs
+Directory.Build.props
 Ldbc.psd1
-*.LiteDB

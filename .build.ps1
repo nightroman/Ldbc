@@ -25,7 +25,7 @@ task Clean {
 
 $MetaParam = @{
 	Inputs = '.build.ps1', 'Release-Notes.md'
-	Outputs = "Module\$ModuleName.psd1", 'Src\AssemblyInfo.cs'
+	Outputs = "Module\$ModuleName.psd1", 'Src\Directory.Build.props'
 }
 
 # Synopsis: Generate or update meta files.
@@ -60,19 +60,18 @@ task Meta @MetaParam {
 }
 "@
 
-	Set-Content Src\AssemblyInfo.cs @"
-using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
-
-[assembly: AssemblyProduct("$ModuleName")]
-[assembly: AssemblyVersion("$Version")]
-[assembly: AssemblyTitle("$Summary")]
-[assembly: AssemblyCompany("$Project")]
-[assembly: AssemblyCopyright("$Copyright")]
-
-[assembly: ComVisible(false)]
-[assembly: CLSCompliant(false)]
+	Set-Content Src\Directory.Build.props @"
+<Project>
+	<PropertyGroup>
+		<Company>$Project</Company>
+		<Copyright>$Copyright</Copyright>
+		<Description>$Summary</Description>
+		<Product>$ModuleName</Product>
+		<Version>$Version</Version>
+		<FileVersion>$Version</FileVersion>
+		<AssemblyVersion>$Version</AssemblyVersion>
+	</PropertyGroup>
+</Project>
 "@
 }
 

@@ -38,28 +38,29 @@ namespace Ldbc.Commands
 
 			var param = new InputParameters(Parameters);
 
+			// invoke the command and get the result reader
 			using (var reader = param.Arguments == null ? Database.Execute(Command, param.Parameters) : Database.Execute(Command, param.Arguments))
 			{
+				// give the requested collection name
 				if (Collection != null)
 					Collection.Value = reader.Collection;
 
+				// exit quitely
 				if (Quiet)
 					return;
 
+				// write result documents, as requested, or other objects
 				var convert = ParameterAs.GetConvert(_As);
 				while (reader.Read())
 				{
 					var value = reader.Current;
-					switch (value.Type)
+					if (value.Type == BsonType.Document)
 					{
-						case BsonType.Document:
-							WriteObject(convert(value.AsDocument));
-							break;
-						case BsonType.Array:
-							throw new NotImplementedException("TODO BsonType.Array");
-						default:
-							WriteObject(Actor.ToObject(value));
-							break;
+						WriteObject(convert(value.AsDocument));
+					}
+					else
+					{
+						WriteObject(Actor.ToObject(value));
 					}
 				}
 			}

@@ -5,9 +5,10 @@ LiteDB Cmdlets, the document store in PowerShell
 ***
 
 Ldbc is the PowerShell module with [LiteDB](https://www.litedb.org),
-a small, fast and lightweight .NET NoSQL embedded database.
+a small, fast, zero configuration NoSQL embedded database.
 
-The module works with Windows PowerShell v3-v5 .NET Framework 4.5 and PowerShell Core.
+- Ldbc works with Windows PowerShell v3+ (.NET Framework 4.5) and PowerShell Core.
+- LiteDB is included and ready to use without installing or configuring anything.
 
 Some LiteDB features:
 
@@ -26,7 +27,7 @@ retrieve hashtables and dictionaries, PowerShell classes and custom objects,
 
 **Step 1:** Get and install
 
-Ldbc is published as the PSGallery module [Ldbc](https://www.powershellgallery.com/packages/Ldbc).
+Ldbc is published as the [PSGallery module](https://www.powershellgallery.com/packages/Ldbc).
 
 You can install the module by this command:
 
@@ -113,8 +114,8 @@ Use-LiteDatabase :memory: {
 Read cmdlets help with basic examples. Take a look at tests in the repository
 for more technical examples.
 
-Read LiteDB [DOCS](https://www.litedb.org/docs/). Some LiteDB API may and
-should be used directly. Ldbc is the helper, not replacement.
+Read LiteDB [docs](https://www.litedb.org/docs/).
+Some API may be needed and used directly in addition to provided by the module.
 
 ## LiteDB methods and module commands
 

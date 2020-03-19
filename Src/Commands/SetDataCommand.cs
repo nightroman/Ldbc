@@ -3,6 +3,7 @@
 // http://www.apache.org/licenses/LICENSE-2.0
 
 using LiteDB;
+using System;
 using System.Management.Automation;
 
 namespace Ldbc.Commands
@@ -50,9 +51,13 @@ namespace Ldbc.Commands
 						++_count;
 				}
 			}
+			catch (ArgumentException exn)
+			{
+				WriteErrorBsonValue(exn, InputObject);
+			}
 			catch (LiteException exn)
 			{
-				WriteException(exn, InputObject);
+				WriteErrorException(exn, InputObject);
 			}
 		}
 

@@ -147,7 +147,7 @@ task Version {
 	$data = & ([scriptblock]::Create([IO.File]::ReadAllText("$ModuleRoot\$ModuleName.psd1")))
 	assert ($data.ModuleVersion -eq $script:Version)
 	# assembly version
-	assert ((Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.FileVersion -eq ([Version]"$script:Version.0"))
+	assert ((Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.FileVersion -eq ([Version]$script:Version))
 }
 
 # Synopsis: Make the package in z\tools.

@@ -51,11 +51,11 @@ namespace Ldbc.Commands
 			}
 			catch (ArgumentException exn)
 			{
-				WriteError(DocumentInput.NewErrorRecordBsonValue(exn, InputObject));
+				WriteErrorBsonValue(exn, InputObject);
 			}
 			catch (LiteException exn)
 			{
-				WriteException(exn, InputObject);
+				WriteErrorException(exn, InputObject);
 			}
 		}
 	}

@@ -19,7 +19,11 @@ namespace Ldbc.Commands
 			if (exn == null) throw new InvalidOperationException();
 			throw new RuntimeException($"{exn.Message}{Environment.NewLine}{exn.ErrorRecord.InvocationInfo.PositionMessage}", exn);
 		}
-		protected void WriteException(Exception exception, object target)
+		protected void WriteErrorBsonValue(Exception value, object targetObject)
+		{
+			WriteError(new ErrorRecord(value, "BsonValue", ErrorCategory.InvalidData, targetObject));
+		}
+		protected void WriteErrorException(Exception exception, object target)
 		{
 			WriteError(new ErrorRecord(exception, "Ldbc", ErrorCategory.NotSpecified, target));
 		}

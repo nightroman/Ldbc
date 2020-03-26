@@ -5,19 +5,9 @@
 using LiteDB;
 using System;
 using System.Management.Automation;
-using System.Reflection;
 
 namespace Ldbc.Commands
 {
-	static class CollectionExt //rk temp
-	{
-		static readonly FieldInfo _autoiId = typeof(LiteCollection<BsonDocument>).GetField("_autoId", BindingFlags.Instance | BindingFlags.NonPublic);
-		public static BsonAutoId AutoId(this ILiteCollection<BsonDocument> collection)
-		{
-			return (BsonAutoId)_autoiId.GetValue(collection);
-		}
-	}
-
 	[Cmdlet(VerbsCommon.Add, "LiteData")]
 	public sealed class AddDataCommand : Abstract
 	{
@@ -34,7 +24,7 @@ namespace Ldbc.Commands
 
 		protected override void BeginProcessing()
 		{
-			_convert = Actor.ToBsonDocumentNoDefaultId(Collection.AutoId());
+			_convert = Actor.ToBsonDocumentNoDefaultId(Collection.AutoId);
 		}
 
 		protected override void ProcessRecord()

@@ -30,7 +30,7 @@ namespace Ldbc.Commands
 		protected override void BeginProcessing()
 		{
 			if (Add)
-				_convert = Actor.ToBsonDocumentNoDefaultId(Collection.AutoId());
+				_convert = Actor.ToBsonDocumentNoDefaultId(Collection.AutoId);
 		}
 
 		protected override void ProcessRecord()

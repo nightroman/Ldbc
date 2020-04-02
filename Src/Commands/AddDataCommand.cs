@@ -20,7 +20,7 @@ namespace Ldbc.Commands
 		[Parameter]
 		public SwitchParameter Result { get; set; }
 
-		System.Func<object, BsonDocument> _convert;
+		Func<object, BsonDocument> _convert;
 
 		protected override void BeginProcessing()
 		{

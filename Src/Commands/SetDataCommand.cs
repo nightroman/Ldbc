@@ -25,7 +25,7 @@ namespace Ldbc.Commands
 
 		int _count = 0;
 
-		System.Func<object, BsonDocument> _convert;
+		Func<object, BsonDocument> _convert;
 
 		protected override void BeginProcessing()
 		{

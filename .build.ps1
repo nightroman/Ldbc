@@ -164,6 +164,7 @@ task Package Build, Help, TestHelp, Test, Test6, Markdown, {
 
 # Synopsis: Make and push the PSGallery package.
 task PushPSGallery Package, Version, {
+	assert ($env:LiteDBReferenceProject -ne 1)
 	$NuGetApiKey = Read-Host NuGetApiKey
 	Publish-Module -Path z/tools/$ModuleName -NuGetApiKey $NuGetApiKey
 },

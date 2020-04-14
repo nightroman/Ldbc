@@ -74,8 +74,10 @@ task DbRef {
 		equals "$r" '{"_id":1,"Customer":{"$id":1,"$ref":"customers"},"Products":[{"$id":1,"$ref":"products"},{"$id":2,"$ref":"products"}]}'
 
 		# raw, with refs
+		#! LiteDB 5.0.7 https://github.com/mbdavid/LiteDB/issues/1632
+		#! Raw ref documents are returned with `$id` keys, not `_id`.
 		$r = Get-LiteData $orders -Include 'Customer', 'Products[*]'
-		equals "$r" '{"_id":1,"Customer":{"_id":1,"Name":"John"},"Products":[{"_id":1,"Name":"Foo"},{"_id":2,"Name":"Bar"}]}'
+		equals "$r" '{"_id":1,"Customer":{"$id":1,"Name":"John"},"Products":[{"$id":1,"Name":"Foo"},{"$id":2,"Name":"Bar"}]}'
 
 		# typed, no refs
 		$r = Get-LiteData $orders -As Order

@@ -14,7 +14,7 @@
     <ProjectReference Include="$(LiteDBReferenceProject)" />
   </ItemGroup>
   <ItemGroup Condition="$(LiteDBReferenceProject) == ''">
-    <PackageReference Include="LiteDB" Version="5.0.5" />
+    <PackageReference Include="LiteDB" Version="5.0.7" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8" />

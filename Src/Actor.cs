@@ -206,8 +206,8 @@ namespace Ldbc
 		}
 		static void IncSerializationDepth(ref int depth)
 		{
-			if (++depth > 20) //??
-				throw new InvalidOperationException("Data exceed the default maximum serialization depth.");
+			if (++depth > BsonMapper.Global.MaxDepth)
+				throw new InvalidOperationException($"Data exceed the maximum depth {BsonMapper.Global.MaxDepth}.");
 		}
 		public static Collection<PSObject> InvokeScript(ScriptBlock script, object value)
 		{

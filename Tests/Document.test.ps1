@@ -36,7 +36,12 @@ task Json {
 	# Print() ~> pretty JSON
 	$json3 = $d.Print()
 	$json3
-	equals (Get-MD5 $json3) ([guid]'9c4b58fc-dc2e-dc7a-40b2-016e15fc0a14')
+	if ($IsUnix) {
+		equals (Get-MD5 $json3) ([guid]'baaa0fde-3e86-f1b5-872d-36a4297763ce')
+	}
+	else {
+		equals (Get-MD5 $json3) ([guid]'9c4b58fc-dc2e-dc7a-40b2-016e15fc0a14')
+	}
 
 	# parse pretty JSON
 	$r = [Ldbc.Dictionary]::FromJson($json3)

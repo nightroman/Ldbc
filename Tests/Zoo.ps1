@@ -5,6 +5,8 @@
 
 Import-Module Ldbc
 
+$IsUnix = $PSVersionTable['Platform'] -eq 'Unix'
+
 # Gets a dictionary with all known bson types
 function New-BsonBag {
 	$m = [Ldbc.Dictionary]::new()

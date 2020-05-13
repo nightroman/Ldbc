@@ -1,8 +1,14 @@
 # Ldbc Release Notes
 
+See also [LiteDB/releases](https://github.com/mbdavid/LiteDB/releases)
+
+## v0.7.4
+
+LiteDB 5.0.8
+
 ## v0.7.3
 
-LiteDB [5.0.7](https://github.com/mbdavid/LiteDB/releases/tag/v5.0.7)
+LiteDB 5.0.7
 
 Use configurable `BsonMapper.Global.MaxDepth`.
 

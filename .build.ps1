@@ -1,6 +1,6 @@
 <#
 .Synopsis
-	Build script (https://github.com/nightroman/Invoke-Build)
+	Build script, https://github.com/nightroman/Invoke-Build
 #>
 
 param(
@@ -19,7 +19,7 @@ function Get-Version {
 }
 
 # Synopsis: Clean the workspace.
-task Clean {
+task clean {
 	remove *.nupkg, z, Src\bin, Src\obj, README.htm
 }
 
@@ -29,7 +29,7 @@ $MetaParam = @{
 }
 
 # Synopsis: Generate or update meta files.
-task Meta @MetaParam {
+task meta @MetaParam {
 	$Version = Get-Version
 	$Project = 'https://github.com/nightroman/Ldbc'
 	$Summary = 'LiteDB Cmdlets, the document store in PowerShell'
@@ -76,19 +76,19 @@ task Meta @MetaParam {
 }
 
 # Synopsis: Build the project (and post-build Publish).
-task Build Meta, {
+task build meta, {
 	exec { dotnet build Src\$ModuleName.csproj -c $Configuration -f $TargetFramework }
 }
 
 # Synopsis: Publish the module (post-build).
-task Publish {
+task publish {
 	remove $ModuleRoot
 	exec { robocopy Module $ModuleRoot /s /np /r:0 /xf *-Help.ps1 } (0..3)
 	exec { robocopy Src\bin\$Configuration\$TargetFramework $ModuleRoot /s /np /r:0 } (0..3)
 },
-CopyXml
+copyXml
 
-task CopyXml {
+task copyXml {
 	$xml = [xml](Get-Content Src\$ModuleName.csproj)
 	$_ = $xml.SelectSingleNode('//PackageReference[@Include="LiteDB"]')
 	if ($_) {
@@ -102,7 +102,7 @@ task CopyXml {
 }
 
 # Synopsis: Build help by Helps (https://github.com/nightroman/Helps).
-task Help @{
+task help @{
 	Inputs = {Get-Item Src\Commands\*, Module\en-US\$ModuleName.dll-Help.ps1}
 	Outputs = {"$ModuleRoot\en-US\$ModuleName.dll-Help.xml"}
 	Jobs = {
@@ -112,24 +112,24 @@ task Help @{
 }
 
 # Synopsis: Make an test help.
-task TestHelp Help, {
+task testHelp help, {
 	. Helps.ps1
 	Test-Helps Module\en-US\$ModuleName.dll-Help.ps1
 }
 
 # Synopsis: Test in the current PowerShell.
-task Test {
+task test {
 	$ErrorView = 'NormalView'
 	Invoke-Build ** Tests
 }
 
 # Synopsis: Test in PowerShell v6.
-task Test6 -If $env:powershell6 {
+task test6 -If $env:powershell6 {
 	exec {& $env:powershell6 -NoProfile -Command Invoke-Build Test}
 }
 
 # Synopsis: Convert markdown to HTML.
-task Markdown {
+task markdown {
 	assert (Test-Path $env:MarkdownCss)
 	exec { pandoc.exe @(
 		'README.md'
@@ -141,7 +141,7 @@ task Markdown {
 }
 
 # Synopsis: Set $script:Version.
-task Version {
+task version {
 	($script:Version = Get-Version)
 	# manifest version
 	$data = & ([scriptblock]::Create([IO.File]::ReadAllText("$ModuleRoot\$ModuleName.psd1")))
@@ -151,7 +151,7 @@ task Version {
 }
 
 # Synopsis: Make the package in z\tools.
-task Package Build, Help, TestHelp, Test, Test6, Markdown, {
+task package build, help, testHelp, test, test6, markdown, {
 	remove z
 	$null = mkdir z\tools\$ModuleName
 
@@ -163,12 +163,12 @@ task Package Build, Help, TestHelp, Test, Test6, Markdown, {
 }
 
 # Synopsis: Make and push the PSGallery package.
-task PushPSGallery Package, Version, {
+task pushPSGallery package, version, {
 	assert ($env:LiteDBReferenceProject -ne 1)
 	$NuGetApiKey = Read-Host NuGetApiKey
 	Publish-Module -Path z/tools/$ModuleName -NuGetApiKey $NuGetApiKey
 },
-Clean
+clean
 
-# Synopsis: Fast dev round.
-task . Build, Help, Test, Clean
+# Synopsis: Make and test.
+task . build, help, test, clean

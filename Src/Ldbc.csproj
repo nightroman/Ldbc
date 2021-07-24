@@ -14,7 +14,7 @@
     <ProjectReference Include="$(LiteDBReferenceProject)" />
   </ItemGroup>
   <ItemGroup Condition="$(LiteDBReferenceProject) == ''">
-    <PackageReference Include="LiteDB" Version="5.0.10" />
+    <PackageReference Include="LiteDB" Version="5.0.11" />
   </ItemGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>

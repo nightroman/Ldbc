@@ -123,9 +123,9 @@ task test {
 	Invoke-Build ** Tests
 }
 
-# Synopsis: Test in PowerShell v6.
-task test6 -If $env:powershell6 {
-	exec {& $env:powershell6 -NoProfile -Command Invoke-Build Test}
+# Synopsis: Test in PS Core.
+task test7 {
+	exec {pwsh -NoProfile -Command Invoke-Build Test}
 }
 
 # Synopsis: Convert markdown to HTML.
@@ -151,12 +151,12 @@ task version {
 }
 
 # Synopsis: Make the package in z\tools.
-task package build, help, testHelp, test, test6, markdown, {
+task package build, help, testHelp, test, test7, markdown, {
 	remove z
 	$null = mkdir z\tools\$ModuleName
 
 	Copy-Item -Recurse -Destination z\tools\$ModuleName $(
-		'LICENSE.txt'
+		'LICENSE'
 		'README.htm'
 		"$ModuleRoot\*"
 	)

@@ -5,17 +5,17 @@
 
 param(
 	$Configuration = 'Release',
-	$TargetFramework = 'net45'
+	$TargetFramework = 'net472'
 )
 
-Set-StrictMode -Version 2
+Set-StrictMode -Version 3
 $ModuleName = 'Ldbc'
 $ModuleRoot = if ($env:ProgramW6432) {$env:ProgramW6432} else {$env:ProgramFiles}
 $ModuleRoot = "$ModuleRoot\WindowsPowerShell\Modules\$ModuleName"
 
 # Get version from release notes.
 function Get-Version {
-	switch -Regex -File Release-Notes.md {'##\s+v(\d+\.\d+\.\d+)' {return $Matches[1]} }
+	switch -File Release-Notes.md -Regex { '##\s+v(\d+\.\d+\.\d+)' { return $Matches[1] } }
 }
 
 # Synopsis: Clean the workspace.
@@ -46,7 +46,7 @@ task meta @MetaParam {
 	RootModule = '$ModuleName.dll'
 	RequiredAssemblies = 'LiteDB.dll'
 
-	PowerShellVersion = '3.0'
+	PowerShellVersion = '5.1'
 	GUID = '2838cc5c-7ecd-4f52-9aaf-dac1ec6b130e'
 
 	PrivateData = @{
@@ -84,7 +84,7 @@ task build meta, {
 task publish {
 	remove $ModuleRoot
 	exec { robocopy Module $ModuleRoot /s /np /r:0 /xf *-Help.ps1 } (0..3)
-	exec { robocopy Src\bin\$Configuration\$TargetFramework $ModuleRoot /s /np /r:0 } (0..3)
+	exec { robocopy Src\bin\$Configuration\$TargetFramework $ModuleRoot /s /np /r:0 /xf System.Management.Automation.dll } (0..3)
 },
 copyXml
 

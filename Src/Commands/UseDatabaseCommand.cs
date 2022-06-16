@@ -7,7 +7,7 @@ using System.Management.Automation;
 
 namespace Ldbc.Commands
 {
-	[Cmdlet(VerbsOther.Use, "LiteDatabase", DefaultParameterSetName = nsConnectionString)]
+	[Cmdlet(VerbsOther.Use, "LiteDatabase", DefaultParameterSetName = NSConnectionString)]
 	public sealed class UseDatabaseCommand : NewDatabaseCommand
 	{
 		[Parameter(Position = 1, Mandatory = true)]

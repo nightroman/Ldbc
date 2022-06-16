@@ -8,46 +8,68 @@ using System.Management.Automation;
 
 namespace Ldbc.Commands
 {
-	[Cmdlet(VerbsCommon.New, "LiteDatabase", DefaultParameterSetName = nsConnectionString)]
-	[OutputType(typeof(LiteDatabase))]
-	public class NewDatabaseCommand : Abstract
-	{
-		protected const string nsConnectionString = "ConnectionString";
-		const string nsStream = "Stream";
-		const string nameMemoryDB = ":memory:";
+    [Cmdlet(VerbsCommon.New, "LiteDatabase", DefaultParameterSetName = NSConnectionString)]
+    [OutputType(typeof(LiteDatabase))]
+    public class NewDatabaseCommand : Abstract
+    {
+        protected const string NSConnectionString = "ConnectionString";
+        const string NSStream = "Stream";
+        const string NameMemoryDB = ":memory:";
 
-		[Parameter(Position = 0, ParameterSetName = nsConnectionString)]
-		[ValidateNotNull]
-		public ConnectionString ConnectionString { get; set; }
+        [Parameter(ParameterSetName = NSConnectionString, Position = 0)]
+        [ValidateNotNull]
+        public ConnectionString ConnectionString { get; set; }
 
-		[Parameter(Position = 0, ParameterSetName = nsStream)]
-		[ValidateNotNull]
-		public Stream Stream { get; set; }
+        [Parameter(ParameterSetName = NSConnectionString)]
+        public ConnectionType Connection { set { _Connection = value; } }
+        ConnectionType? _Connection;
 
-		protected LiteDatabase CreateDatabase()
-		{
-			if (Stream != null)
-			{
-				return new LiteDatabase(Stream);
-			}
-			else
-			{
-				if (ConnectionString == null)
-				{
-					ConnectionString = new ConnectionString(nameMemoryDB);
-				}
-				else if (!ConnectionString.Filename.Equals(nameMemoryDB, System.StringComparison.OrdinalIgnoreCase))
-				{
-					ConnectionString.Filename = GetUnresolvedProviderPathFromPSPath(ConnectionString.Filename);
-				}
+        [Parameter(ParameterSetName = NSConnectionString)]
+        public SwitchParameter ReadOnly { set { _ReadOnly = value; } }
+        bool? _ReadOnly;
 
-				return new LiteDatabase(ConnectionString);
-			}
-		}
+        [Parameter(ParameterSetName = NSConnectionString)]
+        public SwitchParameter Upgrade { set { _Upgrade = value; } }
+        bool? _Upgrade;
 
-		protected override void BeginProcessing()
-		{
-			WriteObject(CreateDatabase());
-		}
-	}
+        //! It used to be positional (0) and worked fine as such.
+        // But on some -Missing X caused weird "cannot resolve".
+        [Parameter(ParameterSetName = NSStream, Mandatory = true)]
+        public Stream Stream { get; set; }
+
+        protected LiteDatabase CreateDatabase()
+        {
+            if (Stream != null)
+            {
+                return new LiteDatabase(Stream);
+            }
+            else
+            {
+                if (ConnectionString == null)
+                {
+                    ConnectionString = new ConnectionString(NameMemoryDB);
+                }
+                else if (!ConnectionString.Filename.Equals(NameMemoryDB, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    ConnectionString.Filename = GetUnresolvedProviderPathFromPSPath(ConnectionString.Filename);
+                }
+
+                if (_Connection.HasValue)
+                    ConnectionString.Connection = _Connection.Value;
+
+                if (_ReadOnly.HasValue)
+                    ConnectionString.ReadOnly = _ReadOnly.Value;
+
+                if (_Upgrade.HasValue)
+                    ConnectionString.Upgrade = _Upgrade.Value;
+
+                return new LiteDatabase(ConnectionString);
+            }
+        }
+
+        protected override void BeginProcessing()
+        {
+            WriteObject(CreateDatabase());
+        }
+    }
 }

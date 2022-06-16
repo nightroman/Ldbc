@@ -2,6 +2,16 @@
 
 See also [LiteDB/releases](https://github.com/mbdavid/LiteDB/releases)
 
+## v0.8.0
+
+- PowerShell 5.1
+- LiteDB 5.0.12
+
+`New-LiteDatabase`, `Use-LiteDatabase`:
+
+- changed parameter `Stream` to named
+- new parameters: `Connection`, `ReadOnly`, `Upgrade`
+
 ## v0.7.8
 
 Maintenance.

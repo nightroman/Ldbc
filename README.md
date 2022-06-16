@@ -7,8 +7,8 @@ LiteDB Cmdlets, the document store in PowerShell
 Ldbc is the PowerShell module with [LiteDB](https://www.litedb.org),
 a small, fast, zero configuration NoSQL embedded database.
 
-- Ldbc works with Windows PowerShell v3+ (.NET Framework 4.5) and PowerShell Core.
-- LiteDB is included and ready to use without installing or configuring anything.
+- Ldbc works with Windows PowerShell and PowerShell Core.
+- LiteDB is included and ready to use without installing anything.
 
 Some LiteDB features:
 

@@ -3,5 +3,6 @@ bin/
 obj/
 Src/Properties/
 z
+z.*
 Directory.Build.props
 Ldbc.psd1

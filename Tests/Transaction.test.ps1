@@ -6,14 +6,14 @@ Import-Module Ldbc
 task AutoCommit {
 	$stream = [System.IO.MemoryStream]::new()
 
-	$r = Use-LiteDatabase $stream {
+	$r = Use-LiteDatabase -Stream $stream {
 		Use-LiteTransaction {
 			Invoke-LiteCommand 'INSERT INTO test : INT VALUES {p1 : 1}'
 		}
 	}
 	equals $r 1
 
-	$r = Use-LiteDatabase $stream {
+	$r = Use-LiteDatabase -Stream $stream {
 		Invoke-LiteCommand 'SELECT $ FROM test'
 	}
 	equals "$r" '{"_id":1,"p1":1}'
@@ -25,7 +25,7 @@ task AutoRollback {
 	$stream = [System.IO.MemoryStream]::new()
 
 	try {
-		Use-LiteDatabase $stream {
+		Use-LiteDatabase -Stream $stream {
 			Use-LiteTransaction {
 				$r = Invoke-LiteCommand 'INSERT INTO test : INT VALUES {p1 : 1}'
 				equals $r 1
@@ -43,7 +43,7 @@ task AutoRollback {
 		assert ("$_" -like "oops*throw 'oops'*Use-LiteTransaction {*")
 	}
 
-	Use-LiteDatabase $stream {
+	Use-LiteDatabase -Stream $stream {
 		$r = Invoke-LiteCommand 'SELECT $ FROM test'
 		equals $r $null
 	}

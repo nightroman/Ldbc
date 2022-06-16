@@ -461,12 +461,11 @@ supports parameters).
 ### $DatabaseBase
 $DatabaseBase = @{
 	parameters = @{
-		ConnectionString = @'
-Specifies the LiteDB connection string.
-'@
-		Stream = @'
-Specifies the stream for reading and writing as the database.
-'@
+		ConnectionString = 'Specifies the LiteDB connection string.'
+		Stream = 'Specifies the stream for reading and writing as the database.'
+		Connection = 'Connection type.'
+		ReadOnly = 'Tells to open the database in read-only mode.'
+		Upgrade = 'Tells to check for the database older version and upgrade before opening.'
 	}
 }
 

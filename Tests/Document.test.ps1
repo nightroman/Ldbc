@@ -1,5 +1,5 @@
 
-. ./Zoo.ps1
+Import-Module ./Zoo
 
 task DotNotation {
 	# Ldbc dictionary (document wrapper) supports dot notation
@@ -36,7 +36,7 @@ task Json {
 	# Print() ~> pretty JSON
 	$json3 = $d.Print()
 	$json3
-	if ($IsUnix) {
+	if (Test-Unix) {
 		equals (Get-MD5 $json3) ([guid]'baaa0fde-3e86-f1b5-872d-36a4297763ce')
 	}
 	else {

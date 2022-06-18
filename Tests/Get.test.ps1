@@ -1,5 +1,5 @@
 
-. ./Zoo.ps1
+Import-Module ./Zoo
 
 task AsPS {
 	Use-LiteDatabase :memory: {

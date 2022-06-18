@@ -5,7 +5,7 @@
 
 param(
 	$Configuration = 'Release',
-	$TargetFramework = 'net472'
+	$TargetFramework = 'netstandard2.0'
 )
 
 Set-StrictMode -Version 3
@@ -84,21 +84,20 @@ task build meta, {
 task publish {
 	remove $ModuleRoot
 	exec { robocopy Module $ModuleRoot /s /np /r:0 /xf *-Help.ps1 } (0..3)
-	exec { robocopy Src\bin\$Configuration\$TargetFramework $ModuleRoot /s /np /r:0 /xf System.Management.Automation.dll } (0..3)
+	exec { dotnet publish Src\$ModuleName.csproj -c $Configuration -f $TargetFramework --no-build }
+	exec { robocopy Src\bin\$Configuration\$TargetFramework\publish $ModuleRoot /s /np /xf System.Management.Automation.dll } (0..3)
 },
 copyXml
 
+# Synopsis: Copy assembly comment docs to module.
 task copyXml {
 	$xml = [xml](Get-Content Src\$ModuleName.csproj)
-	$_ = $xml.SelectSingleNode('//PackageReference[@Include="LiteDB"]')
-	if ($_) {
-		$from = "$env:USERPROFILE\.nuget\packages\{0}\{1}\lib\net45" -f $_.Include, $_.Version
-		Copy-Item $from\*.xml $ModuleRoot
+	$node = $xml.SelectSingleNode('//PackageReference[@Include="LiteDB"]')
+	if (!$node) {
+		throw "Missing PackageReference LiteDB"
 	}
-	else {
-		# when reference LiteDB.csproj
-		Write-Warning "Missing PackageReference LiteDB"
-	}
+	$dir = "$HOME\.nuget\packages\{0}\{1}\lib\netstandard2.0" -f $node.Include, $node.Version
+	Copy-Item $dir\LiteDB.xml $ModuleRoot
 }
 
 # Synopsis: Build help by Helps (https://github.com/nightroman/Helps).
@@ -150,12 +149,12 @@ task version {
 	assert ((Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.FileVersion -eq ([Version]$script:Version))
 }
 
-# Synopsis: Make the package in z\tools.
+# Synopsis: Make the package in z.
 task package build, help, testHelp, test, test7, markdown, {
 	remove z
-	$null = mkdir z\tools\$ModuleName
+	$null = mkdir z\$ModuleName
 
-	Copy-Item -Recurse -Destination z\tools\$ModuleName $(
+	Copy-Item -Recurse -Destination z\$ModuleName $(
 		'LICENSE'
 		'README.htm'
 		"$ModuleRoot\*"
@@ -164,9 +163,8 @@ task package build, help, testHelp, test, test7, markdown, {
 
 # Synopsis: Make and push the PSGallery package.
 task pushPSGallery package, version, {
-	assert ($env:LiteDBReferenceProject -ne 1)
 	$NuGetApiKey = Read-Host NuGetApiKey
-	Publish-Module -Path z/tools/$ModuleName -NuGetApiKey $NuGetApiKey
+	Publish-Module -Path z\$ModuleName -NuGetApiKey $NuGetApiKey
 },
 clean
 

@@ -1,13 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <ItemGroup Condition="$(LiteDBReferenceProject) != ''">
-    <ProjectReference Include="$(LiteDBReferenceProject)" />
-  </ItemGroup>
-  <ItemGroup Condition="$(LiteDBReferenceProject) == ''">
+  <ItemGroup>
     <PackageReference Include="LiteDB" Version="5.0.12" />
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
   </ItemGroup>

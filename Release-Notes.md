@@ -2,6 +2,11 @@
 
 See also [LiteDB/releases](https://github.com/mbdavid/LiteDB/releases)
 
+## v0.8.1
+
+Build for netstandard2.0.
+This fixes PS v7 issues (some "method not found").
+
 ## v0.8.0
 
 - PowerShell 5.1

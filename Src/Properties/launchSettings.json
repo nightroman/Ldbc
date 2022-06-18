@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "pwsh": {
+      "commandName": "Executable",
+      "executablePath": "pwsh",
+      "commandLineArgs": "-NoProfile -NoExit -Command . About.ps1 $(ProjectDir)\\.."
+    }
+  }
+}

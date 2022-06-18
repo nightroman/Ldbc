@@ -130,13 +130,8 @@ task AutoRollback {
 	}
 }
 
+#! When built for net472, fails in PS v7 with "method not found".
 task ConnectionDirectSharedFails {
-	if ($PSVersionTable.PSVersion.Major -ge 7) {
-		# Method not found: 'Void System.Threading.Mutex..ctor(Boolean, System.String, Boolean ByRef, System.Security.AccessControl.MutexSecurity)'.
-		Write-Warning 'TODO PS7 problem, not new'
-		return
-	}
-
 	remove z.LiteDB
 
 	$Database = New-LiteDatabase z.LiteDB -Connection Direct
@@ -164,13 +159,8 @@ task ConnectionDirectSharedFails {
 	Remove-Item z.LiteDB
 }
 
+#! When built for net472, fails in PS v7 with "method not found".
 task ConnectionSharedDirectWorks {
-	if ($PSVersionTable.PSVersion.Major -ge 7) {
-		# Method not found: 'Void System.Threading.Mutex..ctor(Boolean, System.String, Boolean ByRef, System.Security.AccessControl.MutexSecurity)'.
-		Write-Warning 'TODO PS7 problem, not new'
-		return
-	}
-
 	remove z.LiteDB
 
 	$Database = New-LiteDatabase z.LiteDB -Connection Shared

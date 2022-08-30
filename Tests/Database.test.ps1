@@ -131,7 +131,7 @@ task AutoRollback {
 }
 
 #! When built for net472, fails in PS v7 with "method not found".
-task ConnectionDirectSharedFails {
+task ConnectionDirectSharedFails -If ($Host.Name -ne 'FarHost') {
 	remove z.LiteDB
 
 	$Database = New-LiteDatabase z.LiteDB -Connection Direct
@@ -160,7 +160,7 @@ task ConnectionDirectSharedFails {
 }
 
 #! When built for net472, fails in PS v7 with "method not found".
-task ConnectionSharedDirectWorks {
+task ConnectionSharedDirectWorks -If ($Host.Name -ne 'FarHost') {
 	remove z.LiteDB
 
 	$Database = New-LiteDatabase z.LiteDB -Connection Shared

@@ -147,6 +147,6 @@ Work on module commands and features is in progress, they may change before v1.0
 
 ## See also
 
-- [Ldbc Release Notes](https://github.com/nightroman/Ldbc/blob/master/Release-Notes.md)
-- [about_Ldbc.help.txt](https://github.com/nightroman/Ldbc/blob/master/Module/en-US/about_Ldbc.help.txt)
+- [Ldbc Release Notes](https://github.com/nightroman/Ldbc/blob/main/Release-Notes.md)
+- [about_Ldbc.help.txt](https://github.com/nightroman/Ldbc/blob/main/Module/en-US/about_Ldbc.help.txt)
 - [Mdbc, similar project for MongoDB](https://github.com/nightroman/Mdbc)

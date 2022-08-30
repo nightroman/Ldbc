@@ -2,6 +2,10 @@
 
 See also [LiteDB/releases](https://github.com/mbdavid/LiteDB/releases)
 
+## v0.8.2
+
+Maintenance: master -> main, update links.
+
 ## v0.8.1
 
 Build for netstandard2.0.
@@ -120,7 +124,7 @@ Work around [#1483](https://github.com/mbdavid/LiteDB/issues/1483).
 
 `Add-LiteData`, `Set-LiteData` serialize complex types using the default mapper.
 As a result, in particular, it is now possible to work with PowerShell classes.
-See examples in [Class.test.ps1](https://github.com/nightroman/Ldbc/blob/master/Tests/Class.test.ps1).
+See examples in [Class.test.ps1](https://github.com/nightroman/Ldbc/blob/main/Tests/Class.test.ps1).
 
 Parameters `As` of `Get-LiteData` and `Invoke-LiteCommand` support all suitable
 types, including PowerShell classes. For now, the default global mapper is used.

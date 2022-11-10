@@ -2,6 +2,10 @@
 
 See also [LiteDB/releases](https://github.com/mbdavid/LiteDB/releases)
 
+## v0.8.3
+
+LiteDB 5.0.13
+
 ## v0.8.2
 
 Maintenance: master -> main, update links.

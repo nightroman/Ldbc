@@ -54,7 +54,7 @@ task meta @MetaParam {
 			Tags = 'LiteDB', 'Database', 'NoSQL', 'BSON', 'JSON'
 			ProjectUri = '$Project'
 			LicenseUri = 'http://www.apache.org/licenses/LICENSE-2.0'
-			ReleaseNotes = '$Project/blob/master/Release-Notes.md'
+			ReleaseNotes = '$Project/blob/main/Release-Notes.md'
 		}
 	}
 }
@@ -168,5 +168,5 @@ task pushPSGallery package, version, {
 },
 clean
 
-# Synopsis: Make and test.
-task . build, help, test, clean
+# Synopsis: Make and clean.
+task . build, help, clean

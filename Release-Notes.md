@@ -2,6 +2,10 @@
 
 See also [LiteDB/releases](https://github.com/mbdavid/LiteDB/releases)
 
+## v0.8.7
+
+LiteDB 5.0.17
+
 ## v0.8.6
 
 LiteDB 5.0.16

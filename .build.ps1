@@ -4,33 +4,22 @@
 #>
 
 param(
-	$Configuration = 'Release',
-	$TargetFramework = 'netstandard2.0'
+	[string]$Configuration = 'Release'
+	,
+	[string]$TargetFramework = 'netstandard2.0'
 )
 
 Set-StrictMode -Version 3
 $ModuleName = 'Ldbc'
-$ModuleRoot = if ($env:ProgramW6432) {$env:ProgramW6432} else {$env:ProgramFiles}
-$ModuleRoot = "$ModuleRoot\WindowsPowerShell\Modules\$ModuleName"
+$ModuleRoot = "$env:ProgramFiles\WindowsPowerShell\Modules\$ModuleName"
 
-# Get version from release notes.
-function Get-Version {
-	switch -File Release-Notes.md -Regex { '##\s+v(\d+\.\d+\.\d+)' { return $Matches[1] } }
-}
-
-# Synopsis: Clean the workspace.
-task clean {
+# Synopsis: Remove temp files.
+task clean -After pushPSGallery {
 	remove *.nupkg, z, Src\bin, Src\obj, README.htm
 }
 
-$MetaParam = @{
-	Inputs = '.build.ps1', 'Release-Notes.md'
-	Outputs = "Module\$ModuleName.psd1", 'Src\Directory.Build.props'
-}
-
 # Synopsis: Generate or update meta files.
-task meta @MetaParam {
-	$Version = Get-Version
+task meta -Inputs .build.ps1, Release-Notes.md -Outputs "Module\$ModuleName.psd1", Src\Directory.Build.props -Jobs version, {
 	$Project = 'https://github.com/nightroman/Ldbc'
 	$Summary = 'LiteDB Cmdlets, the document store in PowerShell'
 	$Copyright = 'Copyright (c) Roman Kuzmin'
@@ -68,8 +57,7 @@ task meta @MetaParam {
 		<Description>$Summary</Description>
 		<Product>$ModuleName</Product>
 		<Version>$Version</Version>
-		<FileVersion>$Version</FileVersion>
-		<AssemblyVersion>$Version</AssemblyVersion>
+		<IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
 	</PropertyGroup>
 </Project>
 "@
@@ -86,11 +74,10 @@ task publish {
 	exec { robocopy Module $ModuleRoot /s /np /r:0 /xf *-Help.ps1 } (0..3)
 	exec { dotnet publish Src\$ModuleName.csproj -c $Configuration -f $TargetFramework --no-build }
 	exec { robocopy Src\bin\$Configuration\$TargetFramework\publish $ModuleRoot /s /np /xf System.Management.Automation.dll } (0..3)
-},
-copyXml
+}
 
 # Synopsis: Copy assembly comment docs to module.
-task copyXml {
+task copyXml -After publish {
 	$xml = [xml](Get-Content Src\$ModuleName.csproj)
 	$node = $xml.SelectSingleNode('//PackageReference[@Include="LiteDB"]')
 	if (!$node) {
@@ -116,17 +103,6 @@ task testHelp help, {
 	Test-Helps Module\en-US\$ModuleName.dll-Help.ps1
 }
 
-# Synopsis: Test in the current PowerShell.
-task test {
-	$ErrorView = 'NormalView'
-	Invoke-Build ** Tests
-}
-
-# Synopsis: Test in PS Core.
-task test7 {
-	exec {pwsh -NoProfile -Command Invoke-Build Test}
-}
-
 # Synopsis: Convert markdown to HTML.
 task markdown {
 	assert (Test-Path $env:MarkdownCss)
@@ -143,16 +119,14 @@ task markdown {
 
 # Synopsis: Set $script:Version.
 task version {
-	($script:Version = Get-Version)
-	# manifest version
-	$data = & ([scriptblock]::Create([IO.File]::ReadAllText("$ModuleRoot\$ModuleName.psd1")))
-	assert ($data.ModuleVersion -eq $script:Version)
-	# assembly version
-	assert ((Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.FileVersion -eq ([Version]$script:Version))
+	($script:Version = switch -Regex -File Release-Notes.md {'##\s+v(\d+\.\d+\.\d+)' {$Matches[1]; break}})
 }
 
-# Synopsis: Make the package in z.
-task package build, help, testHelp, test, test7, markdown, {
+# Synopsis: Make the package.
+task package build, help, testHelp, markdown, version, {
+	assert ((Get-Module $ModuleName -ListAvailable).Version -eq ([Version]$Version))
+	equals (Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.FileVersion "$Version.0"
+
 	remove z
 	$null = mkdir z\$ModuleName
 
@@ -161,14 +135,44 @@ task package build, help, testHelp, test, test7, markdown, {
 		'README.htm'
 		"$ModuleRoot\*"
 	)
+
+	$result = Get-ChildItem z\$ModuleName -Recurse -File -Name | Out-String
+	$sample = @'
+Ldbc.deps.json
+Ldbc.dll
+Ldbc.pdb
+Ldbc.psd1
+LICENSE
+LiteDB.dll
+LiteDB.xml
+README.htm
+en-US\about_Ldbc.help.txt
+en-US\Ldbc.dll-Help.xml
+'@
+	Assert-SameFile.ps1 -Text $sample $result $env:MERGE
 }
 
 # Synopsis: Make and push the PSGallery package.
 task pushPSGallery package, version, {
 	$NuGetApiKey = Read-Host NuGetApiKey
 	Publish-Module -Path z\$ModuleName -NuGetApiKey $NuGetApiKey
-},
-clean
+}
+
+# Synopsis: Test Desktop.
+task desktop -After package {
+	exec {powershell -NoProfile -Command Invoke-Build test}
+}
+
+# Synopsis: Test Core.
+task core -After package {
+	exec {pwsh -NoProfile -Command Invoke-Build test}
+}
+
+# Synopsis: Test current PowerShell.
+task test {
+	$ErrorView = 'NormalView'
+	Invoke-Build ** Tests
+}
 
 # Synopsis: Make and clean.
 task . build, help, clean

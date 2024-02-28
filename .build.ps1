@@ -153,7 +153,7 @@ en-US\Ldbc.dll-Help.xml
 }
 
 # Synopsis: Make and push the PSGallery package.
-task pushPSGallery package, version, {
+task pushPSGallery package, {
 	$NuGetApiKey = Read-Host NuGetApiKey
 	Publish-Module -Path z\$ModuleName -NuGetApiKey $NuGetApiKey
 }

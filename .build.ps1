@@ -125,7 +125,7 @@ task version {
 # Synopsis: Make the package.
 task package build, help, testHelp, markdown, version, {
 	assert ((Get-Module $ModuleName -ListAvailable).Version -eq ([Version]$Version))
-	equals (Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.FileVersion "$Version.0"
+	equals $Version (Get-Item $ModuleRoot\$ModuleName.dll).VersionInfo.ProductVersion
 
 	remove z
 	$null = mkdir z\$ModuleName
@@ -146,6 +146,7 @@ LICENSE
 LiteDB.dll
 LiteDB.xml
 README.htm
+System.Buffers.dll
 en-US\about_Ldbc.help.txt
 en-US\Ldbc.dll-Help.xml
 '@

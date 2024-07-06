@@ -1,6 +1,0 @@
-﻿[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "rk", Scope = "namespaceanddescendants", Target = "~N:Ldbc")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1010:Collections should implement generic interface", Justification = "<Pending>", Scope = "type", Target = "~T:Ldbc.Collection")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "rk", Scope = "namespaceanddescendants", Target = "~N:Ldbc.Commands")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "rk", Scope = "namespaceanddescendants", Target = "~N:Ldbc.Commands")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "rk", Scope = "namespaceanddescendants", Target = "~N:Ldbc.Commands")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1044:Properties should not be write only", Justification = "rk", Scope = "namespaceanddescendants", Target = "~N:Ldbc.Commands")]

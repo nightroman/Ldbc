@@ -9,6 +9,6 @@
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="ib publish -Configuration $(Configuration) -TargetFramework $(TargetFramework)" />
+    <Exec Command="pwsh -nop -c Invoke-Build publish -Configuration $(Configuration) -TargetFramework $(TargetFramework)" />
   </Target>
 </Project>

@@ -1,8 +1,9 @@
 .vs
 bin/
 obj/
-Src/Properties/
-z
+z/
+*.html
+*.nupkg
 z.*
 Directory.Build.props
-Ldbc.psd1
+launchSettings.json

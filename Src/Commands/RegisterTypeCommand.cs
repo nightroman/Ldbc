@@ -1,61 +1,54 @@
-﻿
-// Copyright (c) Roman Kuzmin
-// http://www.apache.org/licenses/LICENSE-2.0
-
-using LiteDB;
-using System;
-using System.Linq;
+﻿using LiteDB;
 using System.Management.Automation;
 
-namespace Ldbc.Commands
+namespace Ldbc.Commands;
+
+[Cmdlet(VerbsLifecycle.Register, "LiteType")]
+public sealed class RegisterClassMapCommand : Abstract
 {
-	[Cmdlet(VerbsLifecycle.Register, "LiteType")]
-	public sealed class RegisterClassMapCommand : Abstract
+	[Parameter(Position = 0, Mandatory = true)]
+	public Type Type { get; set; }
+
+	[Parameter(Position = 1)]
+	public ScriptBlock Serialize { get; set; }
+
+	[Parameter(Position = 2)]
+	public ScriptBlock Deserialize { get; set; }
+
+	static BsonValue DoSerialize(ScriptBlock script, object value)
 	{
-		[Parameter(Position = 0, Mandatory = true)]
-		public Type Type { get; set; }
+		if (script == null)
+			return null;
 
-		[Parameter(Position = 1)]
-		public ScriptBlock Serialize { get; set; }
+		var r = Actor.InvokeScript(script, value);
 
-		[Parameter(Position = 2)]
-		public ScriptBlock Deserialize { get; set; }
+		if (r.Count == 0)
+			return null;
 
-		static BsonValue DoSerialize(ScriptBlock script, object value)
-		{
-			if (script == null)
-				return null;
+		if (r.Count == 1)
+			return Actor.ToBsonValue(r[0]);
 
-			var r = Actor.InvokeScript(script, value);
+		var array = new BsonArray(r.Select(Actor.ToBsonValue));
+		return array;
+	}
 
-			if (r.Count == 0)
-				return null;
+	static object DoDeserialize(ScriptBlock script, BsonValue value)
+	{
+		if (script == null)
+			return null;
 
-			if (r.Count == 1)
-				return Actor.ToBsonValue(r[0]);
+		var r = Actor.InvokeScript(script, Actor.ToObject(value));
+		if (r.Count == 0)
+			return null;
 
-			var array = new BsonArray(r.Select(Actor.ToBsonValue));
-			return array;
-		}
+		if (r.Count > 1)
+			throw new ArgumentException($"Deserialize: expected one or no object, returned {r.Count} objects.");
 
-		static object DoDeserialize(ScriptBlock script, BsonValue value)
-		{
-			if (script == null)
-				return null;
+		return Actor.BaseObject(r[0], out _);
+	}
 
-			var r = Actor.InvokeScript(script, Actor.ToObject(value));
-			if (r.Count == 0)
-				return null;
-
-			if (r.Count > 1)
-				throw new ArgumentException($"Deserialize: expected one or no object, returned {r.Count} objects.");
-
-			return Actor.BaseObject(r[0], out _);
-		}
-
-		protected override void BeginProcessing()
-		{
-			BsonMapper.Global.RegisterType(Type, x => DoSerialize(Serialize, x), x => DoDeserialize(Deserialize, x));
-		}
+	protected override void BeginProcessing()
+	{
+		BsonMapper.Global.RegisterType(Type, x => DoSerialize(Serialize, x), x => DoDeserialize(Deserialize, x));
 	}
 }

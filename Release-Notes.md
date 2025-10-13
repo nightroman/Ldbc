@@ -1,6 +1,20 @@
 # Ldbc Release Notes
+<https://github.com/mbdavid/LiteDB/releases>
 
-See also [LiteDB/releases](https://github.com/mbdavid/LiteDB/releases)
+## v0.9.0
+
+Ldbc v0.9.x moves to LiteDB v6 pre-releases with some major/breaking changes:
+- Requires PowerShell Core 7.4+. PowerShell Desktop is no longer supported.
+- Some breaking changes in `Get-LiteData` sorting parameters.
+
+See <https://www.reddit.com/r/dotnet/comments/1nz2fn5/litedb_its_alive>
+
+LiteDB 6.0.0-prerelease.65
+
+`Get-LiteData`
+- New parameter `GroupBy`.
+- Parameter `OrderBy` is expressions with optional orders.
+- Parameter `Order` was removed.
 
 ## v0.8.11
 

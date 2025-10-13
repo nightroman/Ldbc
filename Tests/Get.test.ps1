@@ -162,7 +162,7 @@ task OrderBy {
 		$r = Get-LiteData $test -Select p -OrderBy p
 		equals "$r" '{"p":1} {"p":2} {"p":3}'
 
-		$r = Get-LiteData $test -Select p -OrderBy p -Order -1
+		$r = Get-LiteData $test -Select p -OrderBy p, -1
 		equals "$r" '{"p":3} {"p":2} {"p":1}'
 	}
 }
@@ -205,20 +205,19 @@ task ByIdWithSelect {
 	}
 }
 
-# -Order without -OrderBy implies -OrderBy _id
-task JustOrder {
-	Use-LiteDatabase -Script {
+task GroupBy {
+	Use-LiteDatabase :memory: {
 		$test = Get-LiteCollection Test
 
-		@{_id = 2}, @{_id = 1}, @{_id = 3} | Add-LiteData $test
+		Add-LiteData $test @{_id=1; p1='v1'}
+		Add-LiteData $test @{_id=2; p1='v1'}
+		Add-LiteData $test @{_id=3; p1='v2'}
 
-		$r = Get-LiteData $test
-		equals "$r" '{"_id":1} {"_id":2} {"_id":3}'
-
-		$r = Get-LiteData $test -Order 1
-		equals "$r" '{"_id":1} {"_id":2} {"_id":3}'
-
-		$r = Get-LiteData $test -Order -1
-		equals "$r" '{"_id":3} {"_id":2} {"_id":1}'
+		($r = Get-LiteData $test -GroupBy p1)
+		equals $r.Count 2
+		equals $r[0].key v1
+		equals $r[0].items.Count 2
+		equals $r[1].key v2
+		equals $r[1].items.Count 1
 	}
 }

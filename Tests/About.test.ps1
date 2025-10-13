@@ -80,8 +80,30 @@ task PSCustomObject {
 	equals $r[0].GetType().Name PSCustomObject
 }
 
-# warm up and time examples
-task MeasureDemo DemoAddGetRemove, DemoSqlCommands, {
+# time examples
+task MeasureDemo {
 	(Measure-Command { DemoAddGetRemove }).TotalMilliseconds
 	(Measure-Command { DemoSqlCommands }).TotalMilliseconds
+}
+
+task exported_command_exists {
+	$commands = (Get-Command -Module Ldbc).ForEach('Name')
+	$exported = @(
+		$data = Import-PowerShellDataFile ..\Content\Ldbc.psd1
+		$data.AliasesToExport
+		$data.CmdletsToExport
+		$data.FunctionsToExport
+	)
+	foreach($_ in $exported) {
+		assert ($_ -in $commands) "Missing exported command: '$_'."
+	}
+}
+
+task command_help_synopsis {
+	$commands = Get-Command -Module ModuleCSharp
+	foreach($_ in $commands) {
+		if (!(Get-Help $_).Synopsis.EndsWith('.')) {
+			Write-Warning "$($_.CommandType) '$_': Missing synopsis or its period."
+		}
+	}
 }

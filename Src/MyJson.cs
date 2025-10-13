@@ -1,20 +1,14 @@
-﻿
-// Copyright (c) Roman Kuzmin
-// http://www.apache.org/licenses/LICENSE-2.0
+﻿using LiteDB;
 
-using LiteDB;
-using System.IO;
+namespace Ldbc;
 
-namespace Ldbc
+static class MyJson
 {
-	static class MyJson
+	internal static string Print(BsonValue value)
 	{
-		internal static string Print(BsonValue value)
-		{
-			var stringWriter = new StringWriter();
-			var jsonWriter = new JsonWriter(stringWriter) { Pretty = true, Indent = 2 };
-			jsonWriter.Serialize(value);
-			return stringWriter.ToString();
-		}
+		var stringWriter = new StringWriter();
+		var jsonWriter = new JsonWriter(stringWriter) { Pretty = true, Indent = 2 };
+		jsonWriter.Serialize(value);
+		return stringWriter.ToString();
 	}
 }

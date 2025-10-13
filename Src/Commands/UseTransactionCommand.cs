@@ -1,50 +1,44 @@
-﻿
-// Copyright (c) Roman Kuzmin
-// http://www.apache.org/licenses/LICENSE-2.0
-
-using LiteDB;
+﻿using LiteDB;
 using System.Management.Automation;
 
-namespace Ldbc.Commands
+namespace Ldbc.Commands;
+
+[Cmdlet(VerbsOther.Use, "LiteTransaction")]
+public sealed class UseTransactionCommand : Abstract
 {
-	[Cmdlet(VerbsOther.Use, "LiteTransaction")]
-	public sealed class UseTransactionCommand : Abstract
+	[Parameter(Position = 0, Mandatory = true)]
+	public ScriptBlock Script { get; set; }
+
+	[Parameter]
+	public ILiteDatabase Database { get; set; }
+
+	protected override void BeginProcessing()
 	{
-		[Parameter(Position = 0, Mandatory = true)]
-		public ScriptBlock Script { get; set; }
+		Database ??= ResolveDatabase();
 
-		[Parameter]
-		public ILiteDatabase Database { get; set; }
-
-		protected override void BeginProcessing()
+		var trans = Database.BeginTrans();
+		try
 		{
-			if (Database == null)
-				Database = ResolveDatabase();
-
-			var trans = Database.BeginTrans();
 			try
 			{
-				try
-				{
-					var result = Script.Invoke();
-					foreach (var item in result)
-						WriteObject(item);
-				}
-				catch (RuntimeException exn)
-				{
-					ThrowWithPositionMessage(exn);
-				}
-
-				if (trans)
-					Database.Commit();
+				var result = Script.Invoke();
+				foreach (var item in result)
+					WriteObject(item);
 			}
-			catch
+			catch (RuntimeException ex)
 			{
-				if (trans)
-					Database.Rollback();
-
-				throw;
+				ThrowWithPositionMessage(ex);
 			}
+
+			if (trans)
+				Database.Commit();
+		}
+		catch
+		{
+			if (trans)
+				Database.Rollback();
+
+			throw;
 		}
 	}
 }

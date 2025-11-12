@@ -1,4 +1,3 @@
-#TODO https://github.com/nightroman/MyLiteDB/tree/main/gist/_220616_u5-ReadOnly
 
 Import-Module Ldbc
 
@@ -185,6 +184,37 @@ task ConnectionSharedDirectWorks -If ($Host.Name -ne 'FarHost') {
 	finally {
 		$Database.Dispose()
 	}
+
+	Remove-Item z.LiteDB
+}
+
+# 6.0.0-prerelease.73 works
+# https://github.com/litedb-org/LiteDB/issues/2200
+# https://github.com/nightroman/MyLiteDB/tree/main/gist/_220616_u5-ReadOnly
+task open-ReadOnly-write-dispose {
+	remove z.LiteDB
+
+	Use-LiteDatabase z.LiteDB {
+		$c1 = Get-LiteCollection c1
+		@{ _id = 1 } | Add-LiteData $c1
+	}
+
+	$Database = New-LiteDatabase z.LiteDB -ReadOnly
+	$c1 = Get-LiteCollection c1
+
+	# can read
+	$r = Get-LiteData $c1
+	equals "$r" '{"_id":1}'
+
+	# cannot write
+	try { throw @{ _id = 2 } | Add-LiteData $c1 }
+	catch {
+		$_; assert ($_ -like "Could not find file '*\z-log.LiteDB'.")
+		# old: LiteDB ENSURE: discarded page must be writable
+	}
+
+	#! used to fail
+	$Database.Dispose()
 
 	Remove-Item z.LiteDB
 }

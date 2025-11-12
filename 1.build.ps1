@@ -8,8 +8,8 @@ param(
 )
 
 Set-StrictMode -Version 3
-$ModuleName = 'Ldbc'
-$ModuleRoot = "$env:ProgramFiles\PowerShell\Modules\$ModuleName"
+$_name = 'Ldbc'
+$_root = "$env:ProgramFiles\PowerShell\Modules\$_name"
 
 # Synopsis: Remove temp files.
 task clean -After pushPSGallery {
@@ -24,7 +24,7 @@ task meta -Inputs $BuildFile, Release-Notes.md -Outputs Src\Directory.Build.prop
 		<Company>https://github.com/nightroman/Ldbc</Company>
 		<Copyright>Copyright (c) Roman Kuzmin</Copyright>
 		<Description>LiteDB Cmdlets, the document store in PowerShell</Description>
-		<Product>$ModuleName</Product>
+		<Product>$_name</Product>
 		<Version>$Version</Version>
 		<IncludeSourceRevisionInInformationalVersion>False</IncludeSourceRevisionInInformationalVersion>
 	</PropertyGroup>
@@ -34,29 +34,29 @@ task meta -Inputs $BuildFile, Release-Notes.md -Outputs Src\Directory.Build.prop
 
 # Synopsis: Build, publish in post-build, make help.
 task build meta, {
-	exec { dotnet build "Src\$ModuleName.csproj" -c $Configuration --tl:off }
+	exec { dotnet build "Src\$_name.csproj" -c $Configuration --tl:off }
 }
 
 # Synopsis: Publish the module (post-build).
 task publish {
-	exec { dotnet publish "Src\$ModuleName.csproj" -c $Configuration -o $ModuleRoot --no-build }
-	remove "$ModuleRoot\System.Management.Automation.dll", "$ModuleRoot\*.deps.json"
-	Copy-Item Content\* $ModuleRoot
+	exec { dotnet publish "Src\$_name.csproj" -c $Configuration -o $_root --no-build }
+	remove "$_root\System.Management.Automation.dll", "$_root\*.deps.json"
+	Copy-Item Content\* $_root
 }
 
 # Synopsis: Copy assembly comment docs to module.
 task copyXml -After publish {
-	$xml = [xml](Get-Content Src\$ModuleName.csproj)
+	$xml = [xml](Get-Content Src\$_name.csproj)
 	$node = $xml.SelectSingleNode('//PackageReference[@Include="LiteDB"]')
 	if (!$node) {
 		throw "Missing PackageReference LiteDB"
 	}
 	$dir = "$HOME\.nuget\packages\{0}\{1}\lib\netstandard2.0" -f $node.Include, $node.Version
-	Copy-Item $dir\LiteDB.xml $ModuleRoot
+	Copy-Item $dir\LiteDB.xml $_root
 }
 
 # Synopsis: Build help, https://github.com/nightroman/Helps
-task help -After ?build -Inputs {Get-Item Src\Commands\*, Help.ps1} -Outputs "$ModuleRoot\$ModuleName.dll-Help.xml" {
+task help -After ?build -Inputs {Get-Item Src\Commands\*, Help.ps1} -Outputs "$_root\$_name.dll-Help.xml" {
 	. Helps.ps1
 	Convert-Helps Help.ps1 $Outputs
 	Test-Helps Help.ps1
@@ -72,7 +72,7 @@ task markdown {
 		'--embed-resources'
 		'--standalone'
 		"--css=$env:MarkdownCss"
-		"--metadata=pagetitle=$ModuleName"
+		"--metadata=pagetitle=$_name"
 	)}
 }
 
@@ -83,19 +83,19 @@ task version {
 
 # Synopsis: Make the package.
 task package markdown, version, {
-	equals $Version (Get-Item "$ModuleRoot\$ModuleName.dll").VersionInfo.ProductVersion
+	equals $Version (Get-Item "$_root\$_name.dll").VersionInfo.ProductVersion
 
 	remove z
-	$toModule = New-Item z\$ModuleName -ItemType Directory
+	$toModule = New-Item z\$_name -ItemType Directory
 
 	Copy-Item -Recurse -Destination $toModule $(
 		'LICENSE'
 		'README.html'
-		"$ModuleRoot\*"
+		"$_root\*"
 	)
 
-	$text = [System.IO.File]::ReadAllText("$toModule\$ModuleName.psd1")
-	[System.IO.File]::WriteAllText("$toModule\$ModuleName.psd1", $text.Replace('0.0.0', $Version))
+	$text = [System.IO.File]::ReadAllText("$toModule\$_name.psd1")
+	[System.IO.File]::WriteAllText("$toModule\$_name.psd1", $text.Replace('0.0.0', $Version))
 
 	Assert-SameFile.ps1 -Result (Get-ChildItem $toModule -Recurse -File -Name) -Text -View $env:MERGE @'
 about_Ldbc.help.txt
@@ -113,7 +113,7 @@ README.html
 # Synopsis: Make and push the PSGallery package.
 task pushPSGallery package, {
 	$NuGetApiKey = Read-Host NuGetApiKey
-	Publish-Module -Path z\$ModuleName -NuGetApiKey $NuGetApiKey
+	Publish-Module -Path z\$_name -NuGetApiKey $NuGetApiKey
 }
 
 # Synopsis: Run tests.

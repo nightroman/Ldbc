@@ -112,8 +112,7 @@ README.html
 
 # Synopsis: Make and push the PSGallery package.
 task pushPSGallery package, {
-	$NuGetApiKey = Read-Host NuGetApiKey
-	Publish-Module -Path z\$_name -NuGetApiKey $NuGetApiKey
+	Publish-Module -Path z\$_name -NuGetApiKey (property NuGetApiKeyPS)
 }
 
 # Synopsis: Run tests.

@@ -1,6 +1,10 @@
 # Ldbc Release Notes
 <https://github.com/mbdavid/LiteDB/releases>
 
+## v0.9.2
+
+6.0.0-prerelease.75
+
 ## v0.9.1
 
 6.0.0-prerelease.73
